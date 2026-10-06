@@ -1,0 +1,2383 @@
+{
+  "strengthStructure": [
+    {
+      "category": "BACKPROCESS",
+      "subcategories": [
+        {
+          "subcategory": "Spinning-BlowRoom",
+          "designations": [
+            {
+              "designation": "BACK PROCESS INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSISTANT FOREMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "MIXING SORTER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 30,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Spinning Blowroom-4",
+          "designations": [
+            {
+              "designation": "MIXING SORTER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 12,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - CARD ROOM",
+          "designations": [
+            {
+              "designation": "MAINTENANCE INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "CARD TENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 10,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FLOOR CLEANER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - COMBER",
+          "designations": [
+            {
+              "designation": "MAINTENANCE INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "DOUBLE DRAWING TENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LAP FORMER TENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "COMBER TENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 15,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 10,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Spinning - Comber - 4",
+          "designations": [
+            {
+              "designation": "COMBER TENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 5,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LAP FORMER TENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FLOOR CLEANER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Spinning - Comber - 4 Maintenance",
+          "designations": [
+            {
+              "designation": "ASSISTANT FOREMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - DRAWING & SIMPLEX",
+          "designations": [
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "DRAWING SIMPLEX TENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 22,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FLOOR CLEANER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 14,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "RING",
+      "subcategories": [
+        {
+          "subcategory": "SPINNING - RING - 1",
+          "designations": [
+            {
+              "designation": "PRODUCTION INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SECTION SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "EIGHT SIDER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 32,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "PIECER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 22,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "DOFFER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 20,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "BOBBIN CARRIER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - RING - 2",
+          "designations": [
+            {
+              "designation": "PRODUCTION INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SECTION SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "EIGHT SIDER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 36,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "PIECER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 22,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "DOFFER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 20,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "BOBBIN CARRIER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - RING - 3",
+          "designations": [
+            {
+              "designation": "PRODUCTION INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SECTION SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "EIGHT SIDER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 36,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "PIECER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 20,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "DOFFER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 24,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "BOBBIN CARRIER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 6,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - RING - 2 + 3 MAINTENANCE",
+          "designations": [
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 6,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 6,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - RING - 1A MAINTENANCE",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - RING - 1B MAINTENANCE",
+          "designations": [
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - RING - 4A MAINTENANCE",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - RING - 4B MAINTENANCE",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "RING-5 - PRODUCTION",
+          "designations": [
+            {
+              "designation": "PRODUCTION INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SECTION SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "EIGHT SIDER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 30,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "PIECER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 20,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ROVING CARRIER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 6,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "BOBBIN CARRIER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 12,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Spinning - Ring - 5 Maintenance",
+          "designations": [
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSISTANT FOREMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 6,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 8,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - ROLLER COVERING",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "ROLLER COVERING 1",
+          "designations": [
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "AUTOCONE, MACHCONE, RC",
+      "subcategories": [
+        {
+          "subcategory": "SPINNING - AUTO CONE - PRODUCTION",
+          "designations": [
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SR. SUPERVISOR",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "PACKING SUPERVISOR",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FITTER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 100,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FLOOR CLEANER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 14,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "AUTO CONE - MAINTENANCE-7",
+          "designations": [
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "AUTO CONE - PRODUCTION-7",
+          "designations": [
+            {
+              "designation": "FINISHING INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SECTION SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 30,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "TROLLEY MAN",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 8,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FLOOR CLEANER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "LAB",
+      "subcategories": [
+        {
+          "subcategory": "SPINNING",
+          "designations": [
+            {
+              "designation": "GENERAL MANAGER",
+              "grade": "M-18",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "MILLS MANAGER",
+              "grade": "M-16",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "TECHNICAL MANAGER",
+              "grade": "M-15",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SPINNING MANAGER",
+              "grade": "M-15",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR SUPERVISOR MAINTENANCE",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "SPINNING - GENERAL",
+          "designations": [
+            {
+              "designation": "P.A. TO G.M.",
+              "grade": "E-01",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OFFICE ATTENDANT",
+              "grade": "E-01",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "QUALITY ASSURANCE",
+          "designations": [
+            {
+              "designation": "MANAGER QUALITY",
+              "grade": "M-15",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "QUALITY CONTROLER",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "QUALITY SUPERVISOR",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "QUALITY ASSISTANT",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 8,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "USTER OPERATOR",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "QUALITY ASSURANCE-1",
+          "designations": [
+            {
+              "designation": "QA OFFICER",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "QUALITY SUPERVISOR",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SHIFT SUPERVISOR",
+              "grade": "E-04",
+              "cadre": "Staff",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "QUALITY ASSISTANT",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "SERVICES",
+      "subcategories": [
+        {
+          "subcategory": "SPINNING - AIR CONDITIONING",
+          "designations": [
+            {
+              "designation": "AC ENGINEER",
+              "grade": "M-14",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. FORMAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 5,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "COMPRESSOR/XORELLA",
+          "designations": [
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "WATER SUPPLY",
+          "designations": [
+            {
+              "designation": "PUMP MAN",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SENIOR. FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "AIR CONDITIONING&COMPRESSOR-1",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FITTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "AC OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "COMPRESSOR MECHANIC",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "ENGINEERING SERVICES - ELECTRIC",
+          "designations": [
+            {
+              "designation": "DEPUTY MANAGER",
+              "grade": "M-15",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD MOTOR WINDER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "ELECTRIC SPINNING",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD ELECTRICIAN",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ELECTRICIAN",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Engineering Services - Electric - Spinning 1",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ELECTRICIAN",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "MOTOR WINDER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "ELECTRIONICS-1",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD TECHNICIAN",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "TECHNICIAN",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "ELECTRIONICS SPINNING",
+          "designations": [
+            {
+              "designation": "ELECTRONIC ENGINEER",
+              "grade": "M-14",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASM",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD TECHNICIAN",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ELECTRONIC TECHNICIAN",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "POWER HOUSE",
+          "designations": [
+            {
+              "designation": "INCHARGE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SR. MECHANIC",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "GENERATOR OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "COOLING TOWER OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "POWER HOUSE(Solar)",
+          "designations": [
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 23,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Power House - PRU - KGM",
+          "designations": [
+            {
+              "designation": "OPERATOR",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "ENGINEERING SERVICES - MECHANICAL WORKSHOP",
+          "designations": [
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD FITTER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HEAD TURNER",
+              "grade": "E-04",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "WELDER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "TIN SMITH",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "HR & ADMIN",
+      "subcategories": [
+        {
+          "subcategory": "Admin - Carpentry",
+          "designations": [
+            {
+              "designation": "CARPENTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Admin - Civil",
+          "designations": [
+            {
+              "designation": "MASON",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "PAINTER",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 5,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 5,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Admin - Gardening",
+          "designations": [
+            {
+              "designation": "SUPERVISOR",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "GARDNER",
+              "grade": "E-02",
+              "cadre": "Worker",
+              "approvedStrength": 11,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SWEEPER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 11,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Admin - General",
+          "designations": [
+            {
+              "designation": "WAGES INCHARGE",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSTT. ADMIN OFFICER",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "TECHNICIAN",
+              "grade": "E-04",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "PESH IMAM",
+              "grade": "E-04",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ADMIN ASSISTANT",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "GATE INSPECTOR",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "MOAZAN",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OFFICE ATTENDANT",
+              "grade": "E-01",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Admin - Security",
+          "designations": [
+            {
+              "designation": "SENIOR CCTV OPERATOR",
+              "grade": "E-04",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "CCTV OPERATOR",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Admin - Transport",
+          "designations": [
+            {
+              "designation": "DRIVER",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 3,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Administration",
+          "designations": [
+            {
+              "designation": "MANAGER",
+              "grade": "M-15",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSISTANT MANAGER",
+              "grade": "M-14",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ADMIN ASSISTANT",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Finance",
+          "designations": [
+            {
+              "designation": "DY. GENERAL MANAGER",
+              "grade": "M-17",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Finance - Accounts Payable",
+          "designations": [
+            {
+              "designation": "DEPUTY MANAGER",
+              "grade": "M-15",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "ASSISTANT ACCOUNTANT",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "DRIVER",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Finance - Accounts Receivable",
+          "designations": [
+            {
+              "designation": "OFFICE ATTENDANT",
+              "grade": "E-01",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Finance - Main Store KGM",
+          "designations": [
+            {
+              "designation": "SR. STORE OFFICER",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "STORE KEEPER",
+              "grade": "E-03",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "LABOUR",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Finance - R & I Stores KGM",
+          "designations": [
+            {
+              "designation": "ASSISTANT MANAGER",
+              "grade": "M-14",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SUPERVISOR - R & I",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Finance - Treasury",
+          "designations": [
+            {
+              "designation": "MANAGER",
+              "grade": "M-16",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Fire Section",
+          "designations": [
+            {
+              "designation": "EHS OFFICER",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FIRE MAN",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 4,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Human Resource",
+          "designations": [
+            {
+              "designation": "ASSISTANT MANAGER",
+              "grade": "M-14",
+              "cadre": "Staff",
+              "approvedStrength": 0,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "EXECUTIVE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HR OFFICER",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "HR ASSISTANT",
+              "grade": "E-04",
+              "cadre": "Staff",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "TIME KEEPER",
+              "grade": "E-04",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "IT",
+          "designations": [
+            {
+              "designation": "IT TECHNICIAN",
+              "grade": "M-11",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Marketing Yarn",
+          "designations": [
+            {
+              "designation": "DEPUTY GENERAL MANAGER",
+              "grade": "M-17",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "DEPUTY MANAGER",
+              "grade": "M-15",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "SR. MARKETING EXECUTIVE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OFFICE ATTENDANT",
+              "grade": "E-01",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Purchase",
+          "designations": [
+            {
+              "designation": "ASSISTANT MANAGER",
+              "grade": "M-14",
+              "cadre": "Staff",
+              "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

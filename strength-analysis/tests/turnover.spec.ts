@@ -1,0 +1,81 @@
+import { test, expect } from "@playwright/test";
+import * as XLSX from "xlsx";
+import { readFile } from "node:fs/promises";
+import { TURNOVER_HEADERS } from "../lib/turnover-contracts";
+
+async function sampleUpload() {
+  const template = JSON.parse(await readFile("strength-master-seed-0.json", "utf8"));
+  const category = template.strengthStructure[0];
+  const subcategory = category.subcategories[0];
+  const designation = subcategory.designations[0];
+  const data = [subcategory.subcategory, "KGM", "00001", "Sample Employee", designation.designation, "M", "Sunday", designation.grade, "A", designation.cadre, category.category, "2024-01-15"];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Employee turnover report"], [...TURNOVER_HEADERS], data]), "Employees");
+  return { name: "sample-turnover.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) };
+}
+
+test("upload, refresh persistence, navigation, failed replacement, and Excel download", async ({ page }) => {
+  const before = await readFile("strength-master-seed-0.json");
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Upload report", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "Upload report", exact: true }).click();
+  await page.getByLabel("Turnover workbook", { exact: true }).setInputFiles(await sampleUpload());
+  await page.getByRole("button", { name: "Start scanning" }).click();
+  await expect(page.getByRole("dialog", { name: "Report ready", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Got it" }).click();
+  await expect(page.getByText("Saved in this browser. Available after refresh or reopening.", { exact: true })).toBeVisible();
+  await page.screenshot({ path: "test-results/home-desktop.png", fullPage: false });
+  await page.reload();
+  await expect(page.getByText("Restored from this browser. Available after refresh or reopening.", { exact: true })).toBeVisible();
+  await expect(page.getByText("sample-turnover.xlsx", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Configuration", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Strength Configuration", exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Turnover report", exact: true }).click();
+  await expect(page.getByText("sample-turnover.xlsx", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Upload new report" }).click();
+  await page.getByLabel("Turnover workbook", { exact: true }).setInputFiles({ name: "corrupt.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: Buffer.from("not a workbook") });
+  await page.getByRole("button", { name: "Start scanning" }).click();
+  await expect(page.getByRole("dialog", { name: "Report could not be processed" })).toBeVisible();
+  await page.getByRole("button", { name: "Got it" }).click();
+  await expect(page.getByText("sample-turnover.xlsx", { exact: true })).toBeVisible();
+  const downloaded = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download Excel", exact: true }).click();
+  const download = await downloaded;
+  await expect(page.getByRole("dialog", { name: "Excel download started" })).toBeVisible();
+  expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
+  const path = await download.path();
+  const wb = XLSX.read(await readFile(path!), { type: "buffer" });
+  expect(wb.SheetNames).toContain("Employees");
+  expect(wb.SheetNames).toContain("Strength Detail");
+  expect(wb.Sheets.Employees.C5.v).toBe("00001");
+  expect(errors).toEqual([]);
+  expect(await readFile("strength-master-seed-0.json")).toEqual(before);
+});
+
+test("mobile report and dialogs fit the viewport; configuration staging has clear success feedback", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Upload report", exact: true }).click();
+  await page.screenshot({ path: "test-results/upload-mobile.png", fullPage: false });
+  await page.getByLabel("Turnover workbook", { exact: true }).setInputFiles(await sampleUpload());
+  await page.getByRole("button", { name: "Start scanning" }).click();
+  await expect(page.getByRole("dialog", { name: "Report ready", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Got it" }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.screenshot({ path: "test-results/home-mobile.png", fullPage: false });
+  await page.getByRole("link", { name: "Configuration", exact: true }).click();
+  await page.getByRole("button", { name: "Add category", exact: true }).click();
+  await page.getByRole("textbox", { name: "Category name" }).fill("TEST CATEGORY");
+  await page.getByRole("dialog", { name: "Add category", exact: true }).getByRole("button", { name: "Add category", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Category added" })).toBeVisible();
+  await expect(page.getByText("Your change is ready. Select Save changes at the top of the page to save it to the strength configuration.")).toBeVisible();
+  await page.getByRole("button", { name: "Got it" }).click();
+  await expect(page.getByText("Unsaved changes", { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.route("**/config", (route) => route.request().method() === "POST" ? route.abort() : route.continue());
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Configuration could not be saved" })).toBeVisible();
+  await expect(page.getByText("Your changes remain on this page. Try Save changes again before leaving or refreshing.")).toBeVisible();
+});
