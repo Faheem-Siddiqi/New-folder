@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
-import { buildReviewCases, caseIdentity, scenarioKey, againstPostOptions, resolutionAllowed, reviewColors, vacancyFor } from "./review-cases.ts";
+import { buildReviewCases, caseIdentity, againstPostOptions, resolutionAllowed, reviewColors, vacancyFor } from "./review-cases.ts";
 import { appendAdjustment, readAdjustmentHistory } from "./adjustment-history.ts";
 import { createReportWorkbook } from "./report-workbook.ts";
 import { TURNOVER_HEADERS } from "./turnover-contracts.ts";
