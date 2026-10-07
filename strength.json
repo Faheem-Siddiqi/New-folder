@@ -264,8 +264,8 @@
       "subcategory": "Spinning - Comber - 4 Maintenance",
       "designations": [
         {
-          "designation": "ASSISTANT FOREMAN",
-          "grade": "M-11",
+          "designation": "FOREMAN",
+          "grade": "M-12",
           "cadre": "Staff",
           "approvedStrength": 1,
           "onRoll": 0,
@@ -491,7 +491,7 @@
       ]
     },
     {
-      "subcategory": "Spinning - Blow Room Production",
+      "subcategory": "Spinning - Blow Room - Mixing 5",
       "designations": [
         {
           "designation": "BLOW ROOM TENTER",
@@ -504,7 +504,7 @@
       ]
     },
     {
-      "subcategory": "Spinning - Card Production",
+      "subcategory": "Spinning - Card Room - 5",
       "designations": [
         {
           "designation": "CARD TENTER",
