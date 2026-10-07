@@ -517,7 +517,7 @@
       ]
     },
     {
-      "subcategory": "Spinning Drawing & Simplex Production",
+      "subcategory": "Spinning - Drawing & Simplex 5",
       "designations": [
         {
           "designation": "DRAWING SIMPLEX TENTER",
@@ -530,7 +530,7 @@
       ]
     },
     {
-      "subcategory": "Spinning Comber Production",
+      "subcategory": "Spinning - Comber - 5",
       "designations": [
         {
           "designation": "COMBER TENTER",
@@ -1741,6 +1741,14 @@
           "approvedStrength": 2,
           "onRoll": 0,
           "status": "Active"
+        },
+         {
+          "designation": "LABOUR",
+          "grade": "E-01",
+          "cadre": "Worker",
+          "approvedStrength": 2,
+          "onRoll": 0,
+          "status": "Active"
         }
       ]
     },
@@ -2197,7 +2205,7 @@
       ]
     },
     {
-      "subcategory": "Admin - Civil",
+      "subcategory": "Civil-Operations-Labour",
       "designations": [
         {
           "designation": "HEAD PAINTER",
@@ -2325,6 +2333,14 @@
           "designation": "OFFICE ATTENDANT",
           "grade": "E-01",
           "cadre": "Staff",
+          "approvedStrength": 1,
+          "onRoll": 0,
+          "status": "Active"
+        },
+         {
+          "designation": "DEPUTY MANAGER",
+          "grade": "M-15",
+          "cadre": "Executive",
           "approvedStrength": 1,
           "onRoll": 0,
           "status": "Active"
