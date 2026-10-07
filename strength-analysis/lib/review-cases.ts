@@ -59,6 +59,6 @@ export function vacancyFor(report: TurnoverResult, rowIndex: number) {
   return row.approvedStrength - row.onRoll + confirmedAdjustments(report, rowIndex);
 }
 export function resolutionLabel(resolution: Resolution) {
-  return resolution.caseType === "Against Post" ? `Against Post ? ${resolution.assignedAgainstDesignation}` : resolution.caseType === "Other" ? `Other ? ${resolution.otherReason}` : "Social Security";
+  return resolution.caseType === "Against Post" ? `Against Post · ${resolution.assignedAgainstDesignation}` : resolution.caseType === "Other" ? `Other · ${resolution.otherReason}` : "Social Security";
 }
 export const reviewColors = { "Against Post": { fill: "FFDBEAFE", text: "FF1D4ED8", className: "bg-blue-50 text-blue-800 border-blue-200" }, "Social Security Leave": { fill: "FFEEE5DA", text: "FF785B42", className: "bg-[#eee5da] text-[#785b42] border-[#d7c6b2]" }, "Other": { fill: "FFF3F4F6", text: "FF4B5563", className: "bg-neutral-100 text-neutral-700 border-neutral-200" } };

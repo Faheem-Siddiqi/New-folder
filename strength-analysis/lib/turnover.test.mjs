@@ -110,18 +110,19 @@ test("generated XLSX round-trips with separate categories, formula totals, corre
   assert.equal(wb.worksheets.length, 7);
   assert.ok(wb.getWorksheet("RING"));
   assert.ok(wb.getWorksheet("HR   ADMIN"));
-  assert.deepEqual(wb.getWorksheet("Employees").getRow(4).values.slice(1, 13), [...TURNOVER_HEADERS]);
-  assert.equal(wb.getWorksheet("Strength Detail").getCell("G5").value, 1);
-  assert.equal(wb.getWorksheet("Strength Detail").getCell("F5").value, 8);
-  assert.equal(wb.getWorksheet("Strength Detail").getCell("H5").value.result, 7);
-  assert.equal(wb.getWorksheet("Summary").getCell("C10").value.result, 1);
-  assert.equal(wb.getWorksheet("Employees").getCell("C5").value, "0001");
-  assert.equal(wb.getWorksheet("RING").views[0].ySplit, 4);
+  assert.deepEqual(wb.getWorksheet("Employees").getRow(6).values.slice(1, 13), [...TURNOVER_HEADERS]);
+  assert.equal(wb.getWorksheet("Strength Detail").getCell("G7").value, 1);
+  assert.equal(wb.getWorksheet("Strength Detail").getCell("F7").value, 8);
+  assert.equal(wb.getWorksheet("Strength Detail").getCell("H7").value.result, 7);
+  assert.equal(wb.getWorksheet("Summary").getCell("H9").value.result, 1);
+  assert.equal(wb.getWorksheet("Employees").getCell("C7").value, "0001");
+  assert.ok(wb.worksheets.every(sheet => sheet.views.every(view => view.state !== "frozen" && !view.xSplit && !view.ySplit)));
+  for (const sheet of wb.worksheets) { assert.equal(sheet.getRow(4).hasValues, false); assert.equal(sheet.getRow(5).hasValues, false); }
   assert.ok(wb.getWorksheet("RING").autoFilter);
-  assert.equal(wb.getWorksheet("RING").getRow(4).getCell(1).font.bold, true);
+  assert.equal(wb.getWorksheet("RING").getRow(6).getCell(1).font.bold, true);
   assert.equal(wb.getWorksheet("RING").getImages().length, 1);
   for (const sheet of wb.worksheets) {
-    const headers = sheet.getRow(4).values.slice(1);
+    const headers = sheet.getRow(6).values.slice(1);
     assert.ok(headers.every((header) => !/status/i.test(String(header))), `${sheet.name} should not export status`);
     sheet.eachRow((row) => row.eachCell((cell) => assert.ok(!["Active", "Inactive"].includes(cell.value))));
   }
@@ -145,7 +146,7 @@ test("configured categories without designations still receive their own workshe
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(await createReportWorkbook(result));
   assert.ok(wb.getWorksheet("EMPTY"));
-  assert.equal(wb.getWorksheet("Summary").getCell("A11").value, "EMPTY");
+  assert.equal(wb.getWorksheet("Summary").getCell("F9").value, "EMPTY");
 });
 
 test("two-row headers are detected without treating header fragments as employees", () => {
@@ -235,11 +236,11 @@ test("Excel vacancy formulas retain positive, negative and zero values with sign
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.load(await createReportWorkbook(result));
   const detail = wb.getWorksheet("Strength Detail");
-  assert.equal(detail.getCell("H5").value.result, -1);
-  assert.equal(detail.getCell("H6").value.result, 1);
+  assert.equal(detail.getCell("H7").value.result, -1);
+  assert.equal(detail.getCell("H8").value.result, 1);
   const reread = XLSX.read(await wb.xlsx.writeBuffer(), { type: "buffer" });
-  assert.equal(reread.Sheets["Strength Detail"].H7.v, 0);
-  for (const [sheet, ref] of [[detail, "H5:H7"], [wb.getWorksheet("RING"), "G5:G6"]]) {
+  assert.equal(reread.Sheets["Strength Detail"].H9.v, 0);
+  for (const [sheet, ref] of [[detail, "H7:H9"], [wb.getWorksheet("RING"), "G7:G8"]]) {
     assert.equal(sheet.conditionalFormattings[0].ref, ref);
     const rules = sheet.conditionalFormattings[0].rules;
     assert.equal(rules.length, 2);
@@ -262,9 +263,9 @@ test("different, blank and missing grades are accepted and retained only as empl
   assert.deepEqual(result.employees.map((record) => record.employee.Grade), ["M-99", ""]);
   const exported = new ExcelJS.Workbook();
   await exported.xlsx.load(await createReportWorkbook(result));
-  assert.equal(exported.getWorksheet("Employees").getCell("H5").value, "M-99");
-  assert.equal(exported.getWorksheet("Employees").getCell("P5").value, "E-03");
-  assert.equal(exported.getWorksheet("Strength Detail").getCell("G5").value, 2);
+  assert.equal(exported.getWorksheet("Employees").getCell("H7").value, "M-99");
+  assert.equal(exported.getWorksheet("Employees").getCell("P7").value, "E-03");
+  assert.equal(exported.getWorksheet("Strength Detail").getCell("G7").value, 2);
   const headers = TURNOVER_HEADERS.filter((header) => header !== "Grade");
   const missing = scanTurnover(workbook([{ name: "Data", rows: [headers, employeeRow(employee(), headers)] }]), "no-grade.xlsx", template);
   assert.equal(missing.matched, 1);

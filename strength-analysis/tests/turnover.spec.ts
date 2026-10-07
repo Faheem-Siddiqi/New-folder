@@ -86,12 +86,12 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   expect(Buffer.from(excel.getImage(0).buffer!)).toEqual(await readFile("public/kohinoor-logo.png"));
   const wb = XLSX.read(downloadedBytes, { type: "buffer" });
   const summaryRows = XLSX.utils.sheet_to_json<string[]>(wb.Sheets.Summary, { header: 1 });
-  expect(summaryRows.some((row) => row[0] === "Spinning")).toBe(true);
-  expect(summaryRows.some((row) => row[0] === "Administration")).toBe(true);
+  expect(summaryRows.some((row) => row.includes("Spinning"))).toBe(true);
+  expect(summaryRows.some((row) => row.includes("Administration"))).toBe(true);
   expect(wb.SheetNames).toContain("Employees");
   expect(wb.SheetNames).toContain("Strength Detail");
-  expect(wb.Sheets.Employees.C5.v).toBe("00001");
-  for (const sheet of Object.values(wb.Sheets)) expect(XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 })[3].some((header) => /status/i.test(String(header)))).toBe(false);
+  expect(wb.Sheets.Employees.C7.v).toBe("00001");
+  for (const sheet of Object.values(wb.Sheets)) expect(XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 })[5].some((header) => /status/i.test(String(header)))).toBe(false);
   expect(errors).toEqual([]);
   expect(await readFile(STRENGTH_FILE)).toEqual(before);
 });
@@ -299,7 +299,7 @@ test("designation-level cases clear negative vacancy with designation, Social Se
   const third = dialog.getByTestId("designation-case").nth(2);
   await first.getByRole("combobox").selectOption(`post:${target.designation}`);
   await first.getByRole("button", { name: "Save case", exact: true }).click();
-  await expect(first.getByText(`Against Post ? ${target.designation} ? Saved`, { exact: true })).toBeVisible();
+  await expect(first.getByText(`Against Post · ${target.designation} · Saved`, { exact: true })).toBeVisible();
   await expect(dialog.getByText("Vacancy: -2", { exact: true })).toBeVisible();
   await second.getByRole("combobox").selectOption("__social_security__");
   await second.getByRole("button", { name: "Save case", exact: true }).click();
@@ -314,7 +314,7 @@ test("designation-level cases clear negative vacancy with designation, Social Se
   failSave = false;
   await third.getByRole("button", { name: "Save case", exact: true }).click();
   await expect(dialog.getByText("Vacancy: 0", { exact: true })).toBeVisible();
-  await expect(third.getByText("Other ? Temporary duty ? Saved", { exact: true })).toBeVisible();
+  await expect(third.getByText("Other · Temporary duty · Saved", { exact: true })).toBeVisible();
   await page.screenshot({ path: "test-results/review-cases-desktop.png", fullPage: false });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: "test-results/review-cases-mobile.png", fullPage: false });
@@ -325,9 +325,9 @@ test("designation-level cases clear negative vacancy with designation, Social Se
   await page.getByRole("button", { name: "Download Excel", exact: true }).click();
   const path = await (await downloaded).path();
   const excel = XLSX.read(await readFile(path!), {type:"buffer"});
-  expect(excel.Sheets["Strength Detail"].H5.v).toBe(0);
-  expect(excel.Sheets["Strength Detail"].M5.v).toBe(-3);
-  expect(excel.Sheets["Review Cases Adjustments"].F7.v).toBe("Temporary duty");
+  expect(excel.Sheets["Strength Detail"].H7.v).toBe(0);
+  expect(excel.Sheets["Strength Detail"].M7.v).toBe(-3);
+  expect(excel.Sheets["Review Cases Adjustments"].E9.v).toBe("Other · Temporary duty");
   await page.getByRole("button", { name: "Got it", exact: true }).click();
   await page.reload();
   await expect(vacancy).toHaveText("0");
@@ -335,7 +335,7 @@ test("designation-level cases clear negative vacancy with designation, Social Se
   await expect(vacancy).toHaveText("-3");
   await page.getByRole("button", { name: "Review cases", exact: true }).click();
   await expect(dialog.getByText("Previous Match Found", { exact: true })).toHaveCount(3);
-  await expect(dialog.getByText(/? Saved$/, { exact: false })).toHaveCount(0);
+  await expect(dialog.getByText(/\sSaved$/, { exact: false })).toHaveCount(0);
   await first.getByRole("button", { name: "Apply", exact: true }).click();
   await expect(dialog.getByText("Vacancy: -2", { exact: true })).toBeVisible();
   await second.getByRole("button", { name: "Change", exact: true }).click();
