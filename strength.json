@@ -1072,22 +1072,6 @@
           "subcategory": "SPINNING - AUTO CONE - PRODUCTION",
           "designations": [
             {
-              "designation": "INCHARGE MAINTENANCE",
-              "grade": "M-13",
-              "cadre": "Staff",
-              "approvedStrength": 1,
-              "onRoll": 0,
-              "status": "Active"
-            },
-            {
-              "designation": "FOREMAN",
-              "grade": "M-12",
-              "cadre": "Staff",
-              "approvedStrength": 1,
-              "onRoll": 0,
-              "status": "Active"
-            },
-            {
               "designation": "SR. SUPERVISOR",
               "grade": "M-12",
               "cadre": "Staff",
@@ -1116,6 +1100,43 @@
               "grade": "E-04",
               "cadre": "Worker",
               "approvedStrength": 2,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "OPERATOR",
+              "grade": "E-03",
+              "cadre": "Worker",
+              "approvedStrength": 100,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FLOOR CLEANER",
+              "grade": "E-01",
+              "cadre": "Worker",
+              "approvedStrength": 14,
+              "onRoll": 0,
+              "status": "Active"
+            }
+          ]
+        },
+        {
+          "subcategory": "Spinning - Mach Coner",
+          "designations": [
+            {
+              "designation": "INCHARGE MAINTENANCE",
+              "grade": "M-13",
+              "cadre": "Staff",
+              "approvedStrength": 1,
+              "onRoll": 0,
+              "status": "Active"
+            },
+            {
+              "designation": "FOREMAN",
+              "grade": "M-12",
+              "cadre": "Staff",
+              "approvedStrength": 1,
               "onRoll": 0,
               "status": "Active"
             },
@@ -1156,22 +1177,6 @@
               "grade": "E-01",
               "cadre": "Worker",
               "approvedStrength": 3,
-              "onRoll": 0,
-              "status": "Active"
-            },
-            {
-              "designation": "OPERATOR",
-              "grade": "E-03",
-              "cadre": "Worker",
-              "approvedStrength": 100,
-              "onRoll": 0,
-              "status": "Active"
-            },
-            {
-              "designation": "FLOOR CLEANER",
-              "grade": "E-01",
-              "cadre": "Worker",
-              "approvedStrength": 14,
               "onRoll": 0,
               "status": "Active"
             }
@@ -1482,16 +1487,21 @@
               "status": "Active"
             },
             {
-              "designation": "OPERATOR",
-              "grade": "E-03",
+              "designation": "LABOUR",
+              "grade": "E-01",
               "cadre": "Worker",
               "approvedStrength": 2,
               "onRoll": 0,
               "status": "Active"
-            },
+            }
+          ]
+        },
+        {
+          "subcategory": "YARN CONDITION",
+          "designations": [
             {
-              "designation": "LABOUR",
-              "grade": "E-01",
+              "designation": "OPERATOR",
+              "grade": "E-03",
               "cadre": "Worker",
               "approvedStrength": 2,
               "onRoll": 0,

@@ -1,11 +1,13 @@
 import * as XLSX from "xlsx";
 import type { StrengthData } from "./strength-data";
+import { createEmployeeMatcher, normalizeMatch, sameEmployeeIdentity } from "./employee-matching.ts";
+import { strengthRows } from "./strength-rows.ts";
+export { matchEmployee, normalizeMatch } from "./employee-matching.ts";
 
-import { TURNOVER_HEADERS, validateUpload, type Employee, type EmployeeRecord, type ReportRow, type ScanProgress, type TurnoverResult } from "./turnover-contracts.ts";
+import { MATCHING_VERSION, TURNOVER_HEADERS, validateUpload, type Employee, type EmployeeRecord, type ReportRow, type ScanProgress, type TurnoverResult } from "./turnover-contracts.ts";
 export * from "./turnover-contracts.ts";
 const MAX_ROWS = 100_000;
 const MAX_CELLS = 5_000_000;
-export const normalizeMatch = (value: string) => value.normalize("NFKC").toLowerCase().replace(/[^a-z0-9]/g, "");
 const aliases = [
   ["department", "dept", "departmentname"], ["unit", "unitname"], ["emp", "empno", "empnumber", "employeeid", "employeeno", "employeenumber", "empid"],
   ["employeename", "empname", "name"], ["designation", "jobtitle"], ["gender", "sex"], ["restday", "weeklyoff", "offday"],
@@ -33,24 +35,11 @@ function validateSignature(bytes: Uint8Array, name: string) {
 
 function detectHeader(row: string[]) {
   const indexes = aliases.map((names) => row.map((value) => normalizeMatch(String(value ?? ""))).reduce<number[]>((matches, value, index) => names.includes(value) ? [...matches, index] : matches, []));
-  return { count: indexes.filter((index) => index.length > 0).length, indexes, complete: indexes.every((index) => index.length === 1) };
+  return { count: indexes.filter((index) => index.length > 0).length, indexes, complete: indexes.every((index, column) => column === 7 || index.length === 1) };
 }
 
 export function templateRows(template: StrengthData): ReportRow[] {
-  return template.strengthStructure.flatMap((category) => category.subcategories.flatMap((subcategory) => subcategory.designations.map((designation) => ({ ...designation, category: category.category, subcategory: subcategory.subcategory, onRoll: 0 }))));
-}
-
-export function matchEmployee(employee: Employee, rows: ReportRow[]): { match: number | null; issue: string } {
-  const designation = normalizeMatch(employee.Designation);
-  const grade = normalizeMatch(employee.Grade);
-  const contexts = new Set([employee.Department, employee.Unit, employee["Org Group"], `${employee.Department} ${employee.Unit}`, `${employee.Department} ${employee["Org Group"]}`].map(normalizeMatch).filter(Boolean));
-  let candidates = rows.map((row, index) => ({ row, index })).filter(({ row }) => normalizeMatch(row.designation) === designation && normalizeMatch(row.grade) === grade && contexts.has(normalizeMatch(row.subcategory)));
-  if (candidates.length > 1) {
-    const narrowed = candidates.filter(({ row }) => [employee.Department, employee["Org Group"]].some((value) => normalizeMatch(value) === normalizeMatch(row.category)));
-    if (narrowed.length) candidates = narrowed;
-  }
-  if (candidates.length === 1) return { match: candidates[0].index, issue: "" };
-  return { match: null, issue: candidates.length ? "Ambiguous template match. Review department/unit, designation, and grade." : "No matching template department/unit, designation, and grade." };
+  return strengthRows(template, true);
 }
 
 export function scanTurnover(buffer: ArrayBuffer, fileName: string, template: StrengthData, progress: ScanProgress = () => {}): TurnoverResult {
@@ -63,9 +52,13 @@ export function scanTurnover(buffer: ArrayBuffer, fileName: string, template: St
   catch { throw new Error("This workbook is unreadable, corrupted, or password-protected. Open it in Excel, repair it if prompted, and save a new .xlsx copy."); }
   if (!workbook.SheetNames.length || workbook.SheetNames.length > 100) throw new Error("The workbook must contain between 1 and 100 worksheets.");
   const rows = templateRows(template);
+  const matchEmployee = createEmployeeMatcher(rows);
   if (!rows.length) throw new Error("The strength template has no designations. Add them on the Configuration page before scanning.");
-  const result: TurnoverResult = { version: 1, fileName, generatedAt: new Date().toISOString(), templateSignature: JSON.stringify(template), categories: template.strengthStructure.map((category) => category.category), rows, employees: [], issues: [], scannedRows: 0, duplicates: 0, skippedRows: 0, matched: 0, unmatched: 0 };
+  const result: TurnoverResult = { version: 1, matchingVersion: MATCHING_VERSION, fileName, generatedAt: new Date().toISOString(), templateSignature: JSON.stringify(template), categories: template.strengthStructure.map((category) => category.category), rows, employees: [], issues: [], scannedRows: 0, duplicates: 0, skippedRows: 0, matched: 0, unmatched: 0 };
   const seen = new Map<string, EmployeeRecord>();
+  const conflicts = new Set<string>();
+  const identityNames = new Map<string, string>();
+  const repeated: { identity: string; sheet: string; row: number; employeeId: string }[] = [];
   let completeSheets = 0;
   let totalCells = 0;
   let bestHeader: { sheet: string; count: number; missing: string[] } | null = null;
@@ -96,11 +89,15 @@ export function scanTurnover(buffer: ArrayBuffer, fileName: string, template: St
           return "";
         });
         const stacked = detectHeader(combined);
-        if (stacked.complete) { header = stacked.indexes.map((indexes) => indexes[0]); found = true; index++; continue; }
+        if (stacked.complete) { header = stacked.indexes.map((indexes) => indexes[0] ?? -1); found = true; index++; continue; }
       }
-      if (detected.count >= 4 && (!bestHeader || detected.count > bestHeader.count)) bestHeader = { sheet: sheetName, count: detected.count, missing: TURNOVER_HEADERS.filter((_, i) => detected.indexes[i].length !== 1) };
-      if (detected.complete) { header = detected.indexes.map((indexes) => indexes[0]); found = true; continue; }
-      if (detected.count >= 6) { header = null; result.issues.push({ sheet: sheetName, row: index + 1, employeeId: "", message: `Incomplete or duplicate headers: ${TURNOVER_HEADERS.filter((_, i) => detected.indexes[i].length !== 1).join(", ")}. Section skipped.` }); continue; }
+      if (detected.count >= 4 && (!bestHeader || detected.count > bestHeader.count)) bestHeader = { sheet: sheetName, count: detected.count, missing: TURNOVER_HEADERS.filter((_, i) => i !== 7 && detected.indexes[i].length !== 1) };
+      if (detected.complete) {
+        header = detected.indexes.map((indexes) => indexes[0] ?? -1); found = true;
+        if (detected.indexes[7].length > 1) result.issues.push({ sheet: sheetName, row: index + 1, employeeId: "", severity: "info", outcome: "notice", message: "Multiple Grade columns found. The first is displayed as employee information; grade does not affect strength matching." });
+        continue;
+      }
+      if (detected.count >= 6) { header = null; result.issues.push({ sheet: sheetName, row: index + 1, employeeId: "", message: `Incomplete or duplicate headers: ${TURNOVER_HEADERS.filter((_, i) => i !== 7 && detected.indexes[i].length !== 1).join(", ")}. Section skipped.` }); continue; }
       if (!header || values.every((value) => !String(value).trim())) continue;
       const employee = Object.fromEntries(TURNOVER_HEADERS.map((name, i) => {
         let value = values[header![i]] ?? "";
@@ -116,37 +113,49 @@ export function scanTurnover(buffer: ArrayBuffer, fileName: string, template: St
       if (footer) continue;
       result.scannedRows++;
       if (result.scannedRows > MAX_ROWS) throw new Error("The report contains more than 100,000 employee rows. Split it into a smaller workbook.");
-      if (!employee["Emp #"] || !employee.Designation || !employee.Grade || (!employee.Department && !employee.Unit)) {
+      if (!employee["Emp #"] || !employee.Designation || (!employee.Department && !employee.Unit)) {
         result.skippedRows++;
-        result.issues.push({ sheet: sheetName, row: index + 1, employeeId: employee["Emp #"], message: "Row excluded: employee number, designation, grade, and department or unit are required." });
+        result.issues.push({ sheet: sheetName, row: index + 1, employeeId: employee["Emp #"], message: "Row excluded: employee number, designation, and department or unit are required.", severity: "error", outcome: "excluded" });
         continue;
       }
-      const record: EmployeeRecord = { employee, sheet: sheetName, row: index + 1, ...matchEmployee(employee, rows) };
+      const record: EmployeeRecord = { employee, sheet: sheetName, row: index + 1, ...matchEmployee(employee) };
       const identity = `${normalizeMatch(employee.Unit)}|${employee["Emp #"].toLowerCase()}`;
       const previous = seen.get(identity);
       if (previous) {
         result.duplicates++;
-        const identical = TURNOVER_HEADERS.every((name) => normalizeMatch(previous.employee[name]) === normalizeMatch(employee[name]));
-        if (!identical) { previous.match = null; previous.issue = "Conflicting records for the same employee number and unit; excluded from counts."; record.issue = previous.issue; record.match = null; result.employees.push(record); }
-        result.issues.push({ sheet: sheetName, row: index + 1, employeeId: employee["Emp #"], message: identical ? "Duplicate employee number/unit record skipped." : record.issue });
+        const name = normalizeMatch(employee["Employee Name"]);
+        const identical = sameEmployeeIdentity(previous.employee, employee) && (!name || !identityNames.has(identity) || identityNames.get(identity) === name);
+        if (name && !identityNames.has(identity)) identityNames.set(identity, name);
+        if (!identical || conflicts.has(identity)) {
+          conflicts.add(identity);
+          previous.match = null;
+          previous.issue = `Conflicting identity or strength fields for the same employee number/unit. Compare ${previous.sheet} row ${previous.row} with ${sheetName} row ${index + 1}: employee name, department, or designation differs. These records are excluded until corrected.`;
+          record.issue = previous.issue; record.match = null; result.employees.push(record);
+        } else repeated.push({ identity, sheet: sheetName, row: index + 1, employeeId: employee["Emp #"] });
         continue;
       }
       seen.set(identity, record);
+      if (employee["Employee Name"]) identityNames.set(identity, normalizeMatch(employee["Employee Name"]));
       result.employees.push(record);
-      if (!employee["Employee Name"]) result.issues.push({ sheet: sheetName, row: index + 1, employeeId: employee["Emp #"], message: "Employee name is blank in the source." });
+      if (!employee["Employee Name"]) result.issues.push({ sheet: sheetName, row: index + 1, employeeId: employee["Emp #"], message: "Employee name is blank in the source; this does not prevent strength matching.", severity: "info", outcome: "notice" });
     }
     if (found) completeSheets++;
     else result.issues.push({ sheet: sheetName, row: 0, employeeId: "", message: "No complete turnover header found; worksheet skipped." });
   });
   if (!completeSheets) {
     const detected = bestHeader as { sheet: string; count: number; missing: string[] } | null;
-    throw new Error(detected ? `Missing or duplicate headers in ${detected.sheet}: ${detected.missing.join(", ")}. All 12 turnover headers are required.` : "No turnover table found. Include all 12 required column headers; title rows and reordered columns are supported.");
+    throw new Error(detected ? `Missing or duplicate headers in ${detected.sheet}: ${detected.missing.join(", ")}. Grade is optional; the other turnover headers are required.` : "No turnover table found. Include the turnover column headers; Grade is optional. Title rows and reordered columns are supported.");
   }
-  if (!result.employees.length) throw new Error("No valid employee records were found below the headers. Check employee numbers, designation, grade, and department/unit values.");
+  if (!result.employees.length) throw new Error("No valid employee records were found below the headers. Check employee numbers, designation, and department/unit values.");
   progress("Matching employees to the strength template", 80);
+  for (const repeat of repeated) {
+    const first = seen.get(repeat.identity)!;
+    const counted = first.match !== null;
+    result.issues.push({ sheet: repeat.sheet, row: repeat.row, employeeId: repeat.employeeId, severity: counted ? "info" : "warning", outcome: counted ? "counted" : "excluded", message: counted ? `Repeated employee number/unit: counted once from ${first.sheet} row ${first.row}. Grade, shift, rest day, and other employee-detail differences do not exclude this employee.` : `Repeated employee number/unit; its first record is excluded. ${first.issue}` });
+  }
   for (const record of result.employees) {
     if (record.match !== null) { result.rows[record.match].onRoll++; result.matched++; }
-    else { result.unmatched++; result.issues.push({ sheet: record.sheet, row: record.row, employeeId: record.employee["Emp #"], message: record.issue }); }
+    else { result.unmatched++; result.issues.push({ sheet: record.sheet, row: record.row, employeeId: record.employee["Emp #"], message: record.issue, severity: "error", outcome: "excluded" }); }
   }
   progress("Preparing report and validation summary", 94);
   return result;
