@@ -1,5 +1,5 @@
 export const TURNOVER_HEADERS = ["Department", "Unit", "Emp #", "Employee Name", "Designation", "Gender", "Rest Day", "Grade", "Shift", "Pay Sheet", "Org Group", "Joining Date"] as const;
-export const MATCHING_VERSION = 3;
+export const MATCHING_VERSION = 4;
 export type Employee = Record<(typeof TURNOVER_HEADERS)[number], string>;
 export type ReportRow = { category: string; subcategory: string; designation: string; grade: string; cadre: string; approvedStrength: number; onRoll: number; status: string };
 export type EmployeeRecord = { employee: Employee; sheet: string; row: number; match: number | null; issue: string };

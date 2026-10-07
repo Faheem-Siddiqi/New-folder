@@ -65,6 +65,32 @@ test("identical duplicates are counted once and conflicting identities are exclu
   assert.equal(conflict.rows[1].onRoll, 0);
 });
 
+test("apprentice designation rows are ignored in validation and all employee counts", () => {
+  const result = scan([
+    employee({ Designation: "  apprentice  ", Department: "Unknown", Unit: "Unknown" }),
+    employee({ Designation: "APPRENTICE", "Emp #": "0002", "Employee Name": "" }),
+    employee(),
+  ]);
+  assert.equal(result.scannedRows, 1);
+  assert.equal(result.matched, 1);
+  assert.equal(result.unmatched, 0);
+  assert.equal(result.duplicates, 0);
+  assert.equal(result.skippedRows, 0);
+  assert.equal(result.rows[0].onRoll, 1);
+  assert.equal(result.employees.length, 1);
+  assert.deepEqual(result.issues, []);
+});
+
+test("an apprentice-only workbook produces a zero-count report without validation notes", () => {
+  const result = scan([employee({ Designation: "ApPrEnTiCe", "Emp #": "0002" })]);
+  assert.equal(result.scannedRows, 0);
+  assert.equal(result.matched, 0);
+  assert.equal(result.unmatched, 0);
+  assert.equal(result.rows[0].onRoll, 0);
+  assert.equal(result.employees.length, 0);
+  assert.deepEqual(result.issues, []);
+});
+
 test("matching respects department, ignores grade, and does not guess ambiguous departments", () => {
   const result = scan([employee({ Department: "Unknown", Unit: "Unknown" }), employee({ "Emp #": "0002", Grade: "E-99" })]);
   assert.equal(result.matched, 1);

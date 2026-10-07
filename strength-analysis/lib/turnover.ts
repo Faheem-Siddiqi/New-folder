@@ -59,6 +59,8 @@ export function scanTurnover(buffer: ArrayBuffer, fileName: string, template: St
   const conflicts = new Set<string>();
   const identityNames = new Map<string, string>();
   const repeated: { identity: string; sheet: string; row: number; employeeId: string }[] = [];
+  let apprenticeRows = 0;
+  let nonApprenticeRows = 0;
   let completeSheets = 0;
   let totalCells = 0;
   let bestHeader: { sheet: string; count: number; missing: string[] } | null = null;
@@ -111,6 +113,8 @@ export function scanTurnover(buffer: ArrayBuffer, fileName: string, template: St
       if (Object.values(employee).every((value) => !value)) continue;
       const footer = /^(grand\s*total|sub\s*total|total)\b/i.test(employee.Department) || /^(grand\s*total|sub\s*total|total)\b/i.test(employee["Emp #"]);
       if (footer) continue;
+      if (normalizeMatch(employee.Designation) === "apprentice") { apprenticeRows++; continue; }
+      nonApprenticeRows++;
       result.scannedRows++;
       if (result.scannedRows > MAX_ROWS) throw new Error("The report contains more than 100,000 employee rows. Split it into a smaller workbook.");
       if (!employee["Emp #"] || !employee.Designation || (!employee.Department && !employee.Unit)) {
@@ -146,7 +150,7 @@ export function scanTurnover(buffer: ArrayBuffer, fileName: string, template: St
     const detected = bestHeader as { sheet: string; count: number; missing: string[] } | null;
     throw new Error(detected ? `Missing or duplicate headers in ${detected.sheet}: ${detected.missing.join(", ")}. Grade is optional; the other turnover headers are required.` : "No turnover table found. Include the turnover column headers; Grade is optional. Title rows and reordered columns are supported.");
   }
-  if (!result.employees.length) throw new Error("No valid employee records were found below the headers. Check employee numbers, designation, and department/unit values.");
+  if (!result.employees.length && (apprenticeRows === 0 || nonApprenticeRows > 0)) throw new Error("No valid employee records were found below the headers. Check employee numbers, designation, and department/unit values.");
   progress("Matching employees to the strength template", 80);
   for (const repeat of repeated) {
     const first = seen.get(repeat.identity)!;
