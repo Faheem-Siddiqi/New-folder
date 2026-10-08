@@ -1740,7 +1740,7 @@
           "designation": "LABOUR",
           "grade": "E-01",
           "cadre": "Worker",
-          "approvedStrength": 2,
+          "approvedStrength": 0,
           "onRoll": 0,
           "status": "Active"
         }
