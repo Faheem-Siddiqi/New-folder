@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { addCategory, addSubcategory, addDesignation, updateDesignation, toggleDesignationStatus } = await import("./strength-data.ts");
+const { addCategory, addSubcategory, addDesignation, updateDesignation, toggleDesignationStatus, validateStrengthData } = await import("./strength-data.ts");
 
 const makeTree = () => ({
   strengthStructure: [
@@ -24,6 +24,27 @@ const makeTree = () => ({
       ],
     },
   ],
+});
+
+test("configuration rejects duplicate names, incomplete entries and invalid strengths", () => {
+  for (const value of [-1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, "2"]) {
+    const tree = makeTree();
+    tree.strengthStructure[0].subcategories[0].designations[0].approvedStrength = value;
+    assert.throws(() => validateStrengthData(tree), /whole numbers/);
+  }
+  const duplicate = makeTree();
+  duplicate.strengthStructure.push({ category: " production ", subcategories: [] });
+  assert.throws(() => validateStrengthData(duplicate), /category already exists/);
+  const group = makeTree();
+  group.strengthStructure[0].subcategories.push({ subcategory: " RING ", designations: [] });
+  assert.throws(() => validateStrengthData(group), /subcategory already exists/);
+  const incomplete = makeTree();
+  incomplete.strengthStructure[0].subcategories[0].designations[0].grade = " ";
+  assert.throws(() => validateStrengthData(incomplete), /required/);
+  assert.doesNotThrow(() => validateStrengthData({ strengthStructure: [] }));
+  const zero = makeTree();
+  zero.strengthStructure[0].subcategories[0].designations[0].approvedStrength = 0;
+  assert.doesNotThrow(() => validateStrengthData(zero));
 });
 
 test("adds a category, subcategory, and designation", () => {

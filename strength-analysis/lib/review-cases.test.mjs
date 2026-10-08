@@ -1,12 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
 import { buildReviewCases, caseIdentity, againstPostOptions, resolutionAllowed, vacancyFor } from "./review-cases.ts";
-import { appendAdjustment, readAdjustmentHistory } from "./adjustment-history.ts";
 import { createReportWorkbook } from "./report-workbook.ts";
 import { TURNOVER_HEADERS } from "./turnover-contracts.ts";
 
@@ -59,22 +55,6 @@ test("history is suggested by designation and case number; only same-upload conf
   assert.ok(buildReviewCases(report,[{...saved,subcategory:"Another Department"}]).every(entry=>!entry.suggestion));
   report.rows[0].approvedStrength=3;
   assert.equal(buildReviewCases(report,[saved],cases).length,1);
-});
-
-test("separate history preserves all resolutions, serializes writes, retries safely and preserves corruption", async () => {
-  const directory=await mkdtemp(join(tmpdir(),"strength-cases-"));
-  const path=join(directory,"strength-adjustment.json");
-  try {
-    const report=makeReport(); const first=resolution(report,1); const second=resolution(report,2,{caseType:"Other",assignedAgainstDesignation:null,otherReason:"Temporary duty"});
-    await Promise.all([appendAdjustment(first,path),appendAdjustment(second,path)]);
-    assert.equal((await readAdjustmentHistory(path)).length,2);
-    await appendAdjustment(first,path);
-    assert.equal((await readAdjustmentHistory(path)).length,2);
-    await assert.rejects(appendAdjustment({...first,assignedAgainstDesignation:"CHANGED"},path),/already been used/);
-    await writeFile(path,"{broken");
-    await assert.rejects(appendAdjustment(first,path),/history could not be read/);
-    assert.equal(await readFile(path,"utf8"),"{broken");
-  } finally { await rm(directory,{recursive:true,force:true}); }
 });
 
 test("Excel includes all saved case explanations beside adjusted vacancies with only category and summary sheets", async () => {

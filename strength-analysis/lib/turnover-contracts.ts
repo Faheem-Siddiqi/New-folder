@@ -4,7 +4,7 @@ export type Employee = Record<(typeof TURNOVER_HEADERS)[number], string>;
 export type ReportRow = { category: string; subcategory: string; designation: string; grade: string; cadre: string; approvedStrength: number; onRoll: number; status: string };
 export type EmployeeRecord = { employee: Employee; sheet: string; row: number; match: number | null; issue: string };
 export type ReportIssue = { sheet: string; row: number; employeeId: string; message: string; severity?: "info" | "warning" | "error"; outcome?: "counted" | "excluded" | "notice" };
-export type TurnoverResult = { reviewCases?: import("./review-cases").ReviewCase[]; version: 1; matchingVersion?: number; fileName: string; generatedAt: string; templateSignature: string; categories: string[]; rows: ReportRow[]; employees: EmployeeRecord[]; issues: ReportIssue[]; scannedRows: number; duplicates: number; skippedRows: number; matched: number; unmatched: number };
+export type TurnoverResult = { reportId?: string; revision?: number; reviewCases?: import("./review-cases").ReviewCase[]; version: 1; matchingVersion?: number; fileName: string; generatedAt: string; templateSignature: string; categories: string[]; rows: ReportRow[]; employees: EmployeeRecord[]; issues: ReportIssue[]; scannedRows: number; duplicates: number; skippedRows: number; matched: number; unmatched: number };
 export type ScanProgress = (step: string, percent: number) => void;
 export const MAX_FILE_SIZE = 20 * 1024 * 1024;
 

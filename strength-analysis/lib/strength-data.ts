@@ -21,6 +21,32 @@ export type StrengthData = {
   strengthStructure: Category[];
 };
 
+export const configurationNameKey = (name: string) => name.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+
+export function validateStrengthData(data: StrengthData): void {
+  if (!data || !Array.isArray(data.strengthStructure)) throw new Error("The configuration must contain a category list.");
+  const validName = (value: unknown): value is string => typeof value === "string" && !!value.trim() && value.length <= 500;
+  const categories = new Set<string>();
+  for (const category of data.strengthStructure) {
+    if (!category || !validName(category.category) || !Array.isArray(category.subcategories)) throw new Error("Every category needs a name and a subcategory list.");
+    const key = configurationNameKey(category.category);
+    if (categories.has(key)) throw new Error("This category already exists.");
+    categories.add(key);
+    const sections = new Set<string>();
+    for (const section of category.subcategories) {
+      if (!section || !validName(section.subcategory) || !Array.isArray(section.designations)) throw new Error("Every subcategory needs a name and a designation list.");
+      const key = configurationNameKey(section.subcategory);
+      if (sections.has(key)) throw new Error("This subcategory already exists in this category.");
+      sections.add(key);
+      for (const designation of section.designations) {
+        if (!designation || ![designation.designation, designation.grade, designation.cadre].every(validName)) throw new Error("Designation, grade, and cadre are required.");
+        if (![designation.approvedStrength, designation.onRoll].every((value) => Number.isSafeInteger(value) && value >= 0)) throw new Error("Strength values must be non-negative whole numbers.");
+        if (designation.status !== "Active" && designation.status !== "Inactive") throw new Error("Choose Active or Inactive for designation status.");
+      }
+    }
+  }
+}
+
 type DesignationInput = Omit<Designation, "status"> & { status?: Designation["status"] };
 
 const emptyDesignation = (): Designation => ({

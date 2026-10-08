@@ -1,9 +1,18 @@
 import { test, expect } from "@playwright/test";
 import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { TURNOVER_HEADERS } from "../lib/turnover-contracts";
 import { STRENGTH_FILE } from "../lib/strength-file";
+
+let previousResult: string;
+test.beforeEach(async () => {
+  previousResult = await readFile("../strength-last-result.json", "utf8");
+  await writeFile("../strength-last-result.json", JSON.stringify({ version: 1, result: null }));
+});
+test.afterEach(async () => {
+  await writeFile("../strength-last-result.json", previousResult);
+});
 
 async function sampleUpload() {
   const template = JSON.parse(await readFile(STRENGTH_FILE, "utf8"));
@@ -27,7 +36,7 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   await page.getByRole("button", { name: "Start scanning" }).click();
   await expect(page.getByRole("dialog", { name: "Report ready", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Got it" }).click();
-  await expect(page.getByText("Saved in this browser. Available after refresh or reopening.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Latest report saved. Available after refresh or reopening.", { exact: true })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "Status", exact: true })).toHaveCount(0);
   const designationButton = page.getByRole("button", { name: "View employees for BACK PROCESS INCHARGE, M-13, in Spinning-BlowRoom, BACKPROCESS", exact: true });
   await designationButton.click();
@@ -52,7 +61,8 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   const adminSummary = page.getByRole("region", { name: "Admin & HR summary", exact: true });
   const spinningSummary = page.getByRole("region", { name: "Spinning summary", exact: true });
   await expect(adminSummary.getByRole("button", { name: "Administration", exact: true })).toBeVisible();
-  await expect(spinningSummary.getByRole("button")).toHaveCount(5);
+  const currentTemplate = JSON.parse(before.toString());
+  await expect(spinningSummary.getByRole("button")).toHaveCount(currentTemplate.strengthStructure.filter((entry: { category: string }) => entry.category !== "HR & ADMIN").length);
   for (const name of ["Back Process", "Ring", "Autocone / Machcone / RC", "Spinning General / Lab", "Services"]) await expect(spinningSummary.getByRole("button", { name, exact: true })).toBeVisible();
   await page.screenshot({ path: "test-results/summary-desktop.png", fullPage: false });
   await adminSummary.getByRole("button", { name: "Finance", exact: true }).click();
@@ -62,7 +72,7 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   await page.getByRole("button", { name: "Show all subcategories", exact: true }).click();
   await page.screenshot({ path: "test-results/home-desktop.png", fullPage: false });
   await page.reload();
-  await expect(page.getByText("Restored from this browser. Available after refresh or reopening.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Restored from the latest saved report.", { exact: true })).toBeVisible();
   await expect(page.getByText("sample-turnover.xlsx", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Strength Configuration", exact: true })).toBeVisible();
@@ -88,9 +98,9 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   const summaryRows = XLSX.utils.sheet_to_json<string[]>(wb.Sheets.Summary, { header: 1 });
   expect(summaryRows.some((row) => row.includes("Spinning"))).toBe(true);
   expect(summaryRows.some((row) => row.includes("Administration"))).toBe(true);
-  expect(wb.SheetNames).toContain("Employees");
-  expect(wb.SheetNames).toContain("Strength Detail");
-  expect(wb.Sheets.Employees.C7.v).toBe("00001");
+  expect(wb.SheetNames).toContain("BACKPROCESS");
+  expect(wb.SheetNames).toHaveLength(currentTemplate.strengthStructure.length + 1);
+  expect(wb.Sheets.BACKPROCESS.F8.v).toBe(1);
   for (const sheet of Object.values(wb.Sheets)) expect(XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 })[5].some((header) => /status/i.test(String(header)))).toBe(false);
   expect(errors).toEqual([]);
   expect(await readFile(STRENGTH_FILE)).toEqual(before);
@@ -240,121 +250,4 @@ test("restored Strength tables show positive vacancies green and negative vacanc
   await expect(vacancy(designation)).toHaveClass(/text-red-700/);
   await expect(vacancy(positive)).toHaveClass(/text-emerald-700/);
   await page.screenshot({ path: "test-results/strength-restored-desktop.png", fullPage: false });
-});
-
-test("designation-level cases clear negative vacancy with designation, Social Security and Other", async ({ page }) => {
-  const historyBefore = await readFile("../strength-adjustment.json", "utf8");
-  const templateBefore = await readFile(STRENGTH_FILE, "utf8");
-  const template = JSON.parse(templateBefore);
-  const category = template.strengthStructure[0];
-  const subcategory = category.subcategories[0];
-  const designation = subcategory.designations[0];
-  const target = subcategory.designations.find((item: { designation: string }) => item.designation !== designation.designation);
-  const wb = XLSX.utils.book_new();
-  const employees = Array.from({ length: designation.approvedStrength + 3 }, (_, index) => [subcategory.subcategory, "KGM", String(900 + index), `Review Employee ${index}`, designation.designation, "M", "Sunday", "M-99", "A", designation.cadre, category.category, "2024-01-01"]);
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[...TURNOVER_HEADERS], ...employees]), "Employees");
-  const upload = { name: "review-cases.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) };
-  const saved: Record<string, unknown>[] = [];
-  let historyResponse = "";
-  let failSave = false;
-  let historyError = false;
-  await page.route("**/*", async (route) => {
-    const request = route.request();
-    if (request.method() !== "POST" || !request.headers()["next-action"]) return route.continue();
-    const body = request.postData() ?? "";
-    if (body.includes('"caseType"')) {
-      if (failSave) return route.abort();
-      const resolution = JSON.parse(body)[0];
-      expect(resolution.employeeId).toBeUndefined();
-      saved.push(resolution);
-      return route.fulfill({ status: 200, contentType: "text/x-component", body: historyResponse.replace(/^1:\[\]/m, `1:${JSON.stringify({ ok: true, resolution })}`) });
-    }
-    const response = await route.fetch();
-    const text = await response.text();
-    if (/^1:\[\]/m.test(text)) {
-      historyResponse = text;
-      return route.fulfill({ response, body: text.replace(/^1:\[\]/m, `1:${JSON.stringify(historyError ? { error: "Case history could not be read. The existing history has been preserved; restore a valid strength-adjustment.json before saving cases." } : saved)}`) });
-    }
-    return route.fulfill({ response });
-  });
-  const uploadWorkbook = async () => {
-    await page.getByRole("button", { name: /Upload (new )?report/, exact: true }).click();
-    await page.getByLabel("Turnover workbook", { exact: true }).setInputFiles(upload);
-    await page.getByRole("button", { name: "Start scanning" }).click();
-    await expect(page.getByRole("dialog", { name: "Report ready", exact: true })).toBeVisible();
-    await page.getByRole("button", { name: "Got it" }).click();
-  };
-  await page.goto("/");
-  await uploadWorkbook();
-  const vacancy = page.getByRole("button", { name: `View employees for ${designation.designation}, ${designation.grade}, in ${subcategory.subcategory}, ${category.category}`, exact: true }).locator("xpath=ancestor::tr").locator('[data-label="Vacancies"]');
-  await expect(vacancy).toHaveText("-3");
-  await page.getByRole("button", { name: "Review cases", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "Review Cases", exact: true });
-  await expect(dialog.locator("article")).toHaveCount(1);
-  await expect(dialog.getByTestId("designation-case")).toHaveCount(3);
-  await expect(dialog.getByText(/Review Employee/)).toHaveCount(0);
-  await expect(dialog.getByRole("combobox")).toHaveCount(3);
-  const first = dialog.getByTestId("designation-case").nth(0);
-  const second = dialog.getByTestId("designation-case").nth(1);
-  const third = dialog.getByTestId("designation-case").nth(2);
-  await first.getByRole("combobox").selectOption(`post:${target.designation}`);
-  await first.getByRole("button", { name: "Save case", exact: true }).click();
-  await expect(first.getByText(`Against Post · ${target.designation} · Saved`, { exact: true })).toBeVisible();
-  await expect(dialog.getByText("Vacancy: -2", { exact: true })).toBeVisible();
-  await second.getByRole("combobox").selectOption("__social_security__");
-  await second.getByRole("button", { name: "Save case", exact: true }).click();
-  await expect(dialog.getByText("Vacancy: -1", { exact: true })).toBeVisible();
-  await third.getByRole("combobox").selectOption("__other__");
-  await expect(third.getByRole("button", { name: "Save case", exact: true })).toBeDisabled();
-  await third.getByRole("textbox").fill("Temporary duty");
-  failSave = true;
-  await third.getByRole("button", { name: "Save case", exact: true }).click();
-  await expect(third.getByRole("button", { name: "Save case", exact: true })).toBeEnabled();
-  await expect(dialog.getByText("Vacancy: -1", { exact: true })).toBeVisible();
-  failSave = false;
-  await third.getByRole("button", { name: "Save case", exact: true }).click();
-  await expect(dialog.getByText("Vacancy: 0", { exact: true })).toBeVisible();
-  await expect(third.getByText("Other · Temporary duty · Saved", { exact: true })).toBeVisible();
-  await page.screenshot({ path: "test-results/review-cases-desktop.png", fullPage: false });
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: "test-results/review-cases-mobile.png", fullPage: false });
-  expect(await dialog.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
-  await dialog.getByRole("button", { name: "Close review cases" }).click();
-  await expect(vacancy).toHaveText("0");
-  const downloaded = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download Excel", exact: true }).click();
-  const path = await (await downloaded).path();
-  const excel = XLSX.read(await readFile(path!), {type:"buffer"});
-  expect(excel.Sheets["Strength Detail"].H7.v).toBe(0);
-  expect(excel.Sheets["Strength Detail"].M7.v).toBe(-3);
-  expect(excel.Sheets["Review Cases Adjustments"].E9.v).toBe("Other · Temporary duty");
-  await page.getByRole("button", { name: "Got it", exact: true }).click();
-  await page.reload();
-  await expect(vacancy).toHaveText("0");
-  await uploadWorkbook();
-  await expect(vacancy).toHaveText("-3");
-  await page.getByRole("button", { name: "Review cases", exact: true }).click();
-  await expect(dialog.getByText("Previous Match Found", { exact: true })).toHaveCount(3);
-  await expect(dialog.getByText(/\sSaved$/, { exact: false })).toHaveCount(0);
-  await first.getByRole("button", { name: "Apply", exact: true }).click();
-  await expect(dialog.getByText("Vacancy: -2", { exact: true })).toBeVisible();
-  await second.getByRole("button", { name: "Change", exact: true }).click();
-  await second.getByRole("combobox").selectOption("__other__");
-  await second.getByRole("textbox").fill("Training duty");
-  await second.getByRole("button", { name: "Save case", exact: true }).click();
-  await expect(dialog.getByText("Vacancy: -1", { exact: true })).toBeVisible();
-  await third.getByRole("button", { name: "Apply", exact: true }).click();
-  await expect(dialog.getByText("Vacancy: 0", { exact: true })).toBeVisible();
-  await dialog.getByRole("button", { name: "Close review cases" }).click();
-  historyError = true;
-  await page.getByRole("button", { name: "Upload new report", exact: true }).click();
-  await page.getByLabel("Turnover workbook", { exact: true }).setInputFiles(upload);
-  await page.getByRole("button", { name: "Start scanning" }).click();
-  const failure = page.getByRole("dialog", { name: "Report could not be processed", exact: true });
-  await expect(failure).toBeVisible();
-  await expect(failure.getByText(/restore a valid strength-adjustment.json/)).toBeVisible();
-  await failure.getByRole("button", { name: "Got it", exact: true }).click();
-  await expect(vacancy).toHaveText("0");
-  expect(await readFile("../strength-adjustment.json", "utf8")).toBe(historyBefore);
-  expect(await readFile(STRENGTH_FILE, "utf8")).toBe(templateBefore);
 });

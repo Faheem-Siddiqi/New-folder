@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, FileSpreadsheet, Plus, Upload, X } from "lucide-react";
-import { getStrengthData } from "@/app/actions";
-import { loadCaseHistory } from "@/lib/case-history-client";
-import { buildReviewCases, confirmedAdjustments } from "@/lib/review-cases";
+import { getStrengthData, getLatestReport, saveTurnoverResult } from "@/app/actions";
+import { confirmedAdjustments } from "@/lib/review-cases";
 import { ReviewCases } from "./review-cases";
 import { StrengthPanels } from "./strength-panels";
 import { Button } from "./ui/button";
@@ -60,6 +59,31 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
   const busyRef = useRef(false);
   const committing = useRef(false);
   const cancelled = useRef(false);
+  const refreshSequence = useRef(0);
+  const storedFileReportId = useRef<string | undefined>(undefined);
+  const refreshSavedResult = useCallback(async () => {
+    if (busyRef.current) return;
+    const sequence = ++refreshSequence.current;
+    try {
+      const latest = await getLatestReport();
+      if (sequence !== refreshSequence.current || busyRef.current) return;
+      if (JSON.stringify(latest) === JSON.stringify(reportRef.current)) return;
+      reportRef.current = latest;
+      setReport(latest);
+      setEmployeeRowIndex(null);
+      if (!latest || latest.reportId !== storedFileReportId.current) setStoredFile(null);
+      setStorageStatus(latest ? "Loaded from the latest saved report." : "No saved report. Upload a turnover workbook to start.");
+    } catch (error) {
+      setStorageStatus(error instanceof Error ? error.message : "The latest saved report could not be loaded. Please retry.");
+    }
+  }, []);
+  const previousHomeDialog = useRef(false);
+  useEffect(() => {
+    const open = uploadOpen || issuesOpen || employeeRowIndex !== null || feedback !== null;
+    const closed = previousHomeDialog.current && !open;
+    previousHomeDialog.current = open;
+    if (closed) void refreshSavedResult();
+  }, [uploadOpen, issuesOpen, employeeRowIndex, feedback, refreshSavedResult]);
 
   const runWorker = useCallback((worker: Worker, payload: object, title: string, transfer: Transferable[] = []) => new Promise<WorkerMessage>((resolve, reject) => {
     const finish = () => { clearTimeout(timeout); worker.terminate(); activeJob.current = null; };
@@ -78,6 +102,8 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
 
   const processFile = useCallback(async (source: Blob, fileName: string, restored = false, freshTemplate?: StrengthData) => {
     if (busyRef.current) return;
+    const sourceReportId = restored ? reportRef.current?.reportId : undefined;
+    if (restored && storedFileReportId.current !== sourceReportId) return;
     busyRef.current = true;
     cancelled.current = false;
     setProgress({ title: "Scanning turnover report", step: "Loading uploaded workbook", percent: 2 });
@@ -90,23 +116,25 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
       if (cancelled.current) throw new DOMException("Processing cancelled", "AbortError");
       const message = await runWorker(new Worker(new URL("../lib/turnover.worker.ts", import.meta.url)), { buffer, fileName, template: latest }, "Scanning turnover report", [buffer]);
       if (message.type !== "complete" || !message.result) throw new Error("The scan did not return a report.");
-      const history = await loadCaseHistory();
-      const next = { ...message.result, reviewCases: buildReviewCases(message.result, history, restored ? reportRef.current?.reviewCases : []) };
+      const scanned = message.result;
       if (cancelled.current) throw new DOMException("Processing cancelled", "AbortError");
       committing.current = true;
+      const next = await saveTurnoverResult(scanned, sourceReportId);
       setProgress({ title: "Scanning turnover report", step: "Saving report for your next visit", percent: 98 });
       let persisted = true;
       try { await storeReport({ version: 1, file: source, fileName, result: next }); }
       catch { persisted = false; }
       setStoredFile({ file: source, fileName });
+      storedFileReportId.current = next.reportId;
+      reportRef.current = next;
       setReport(next);
       setEmployeeRowIndex(null);
-      setStorageStatus(persisted ? "Saved in this browser. Available after refresh or reopening." : "Browser storage failed. Download now; this new report may be lost after refresh.");
+      setStorageStatus(persisted ? "Latest report saved. Available after refresh or reopening." : "Latest report saved; the original workbook could not be cached in this browser.");
       const warnings = next.issues.filter((issue) => issue.severity !== "info").length;
       setProgress({ title: "Scanning turnover report", step: "Scan complete", percent: 100 });
       await new Promise((resolve) => setTimeout(resolve, 200));
       setProgress(null);
-      setFeedback({ title: restored ? "Saved upload reprocessed" : warnings ? "Report ready — review flagged records" : "Report ready", tone: !persisted || warnings ? "warning" : "success", message: `${next.matched.toLocaleString()} employees matched to the strength template. ${next.unmatched.toLocaleString()} employee records are unmatched or conflicting.\n\n${warnings ? `${warnings.toLocaleString()} validation notes are available under Review issues and in the Excel workbook. ` : ""}${persisted ? "Your report is saved in this browser. Review the category results, then download Excel." : "Browser storage is unavailable or full. Your previous saved report has not been replaced. Download this report before leaving."}` });
+      setFeedback({ title: restored ? "Saved upload reprocessed" : warnings ? "Report ready — review flagged records" : "Report ready", tone: !persisted || warnings ? "warning" : "success", message: `${next.matched.toLocaleString()} employees matched to the strength template. ${next.unmatched.toLocaleString()} employee records are unmatched or conflicting.\n\n${warnings ? `${warnings.toLocaleString()} validation notes are available under Review issues. ` : ""}${persisted ? "Your latest report and case changes are saved. Review the category results, then download Excel." : "Your latest result is saved in JSON. The original workbook could not be cached for reprocessing."}` });
     } catch (error) {
       setProgress(null);
       if (!(error instanceof DOMException && error.name === "AbortError")) setFeedback({ title: "Report could not be processed", tone: "error", message: `${error instanceof Error ? error.message : "Please try uploading a new Excel copy."}\n\nYour previous report and Strength JSON template are unchanged.` });
@@ -115,18 +143,19 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
 
   useEffect(() => {
     let disposed = false;
-    loadReport().then(async (saved) => {
-      if (disposed || !saved) return;
-      const history = await loadCaseHistory();
+    getLatestReport().then(async (latest) => {
+      let saved = null;
+      try { saved = await loadReport(); } catch { /* The JSON remains authoritative. */ }
       if (disposed) return;
-      const restoredReport = { ...saved.result, reviewCases: buildReviewCases(saved.result, history, saved.result.reviewCases) };
-      reportRef.current = restoredReport;
-      setReport(restoredReport);
-      setStoredFile({ file: saved.file, fileName: saved.fileName });
-      setStorageStatus("Restored from this browser. Available after refresh or reopening.");
-      if ((saved.result.templateSignature !== JSON.stringify(template) || saved.result.matchingVersion !== MATCHING_VERSION)) void processFile(saved.file, saved.fileName, true);
+      if (disposed || !latest) return;
+      reportRef.current = latest;
+      setReport(latest);
+      const sameUpload = saved?.result.reportId === latest.reportId;
+      if (saved && sameUpload) { setStoredFile({ file: saved.file, fileName: saved.fileName }); storedFileReportId.current = latest.reportId; }
+      setStorageStatus("Restored from the latest saved report.");
+      if (saved && sameUpload && (latest.templateSignature !== JSON.stringify(template) || latest.matchingVersion !== MATCHING_VERSION)) void processFile(saved.file, saved.fileName, true);
     }).catch((error) => {
-      if (!disposed) { setStorageStatus("Browser storage could not be restored. Upload a workbook to continue."); setFeedback({ title: "Saved report unavailable", tone: "warning", message: `${error instanceof Error ? error.message : "Browser storage could not be accessed."} You can still upload, scan, and download a new report.` }); }
+      if (!disposed) { setStorageStatus("The latest saved report could not be restored."); setFeedback({ title: "Saved report unavailable", tone: "warning", message: error instanceof Error ? error.message : "The latest saved report could not be accessed. Please retry." }); }
     }).finally(() => { if (!disposed) setRestoring(false); });
     return () => { disposed = true; };
   }, [processFile, template]);
@@ -178,13 +207,16 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
         if (cancelled.current) throw new DOMException("Processing cancelled", "AbortError");
         const refreshed = await runWorker(new Worker(new URL("../lib/turnover.worker.ts", import.meta.url)), { buffer, fileName: storedFile.fileName, template: latest }, "Refreshing current strength", [buffer]);
         if (refreshed.type !== "complete" || !refreshed.result) throw new Error("Current strength could not be refreshed.");
-        exportReport = { ...refreshed.result, reviewCases: buildReviewCases(refreshed.result, await loadCaseHistory(), report.reviewCases) };
+        exportReport = await saveTurnoverResult(refreshed.result, report.reportId);
+        storedFileReportId.current = exportReport.reportId;
         setEmployeeRowIndex(null);
         setReport(exportReport);
         try { await storeReport({ version: 1, ...storedFile, result: exportReport }); }
         catch { setStorageStatus("Updated strength is available now, but browser storage failed. Download before leaving."); }
       }
-      exportReport = { ...exportReport, reviewCases: buildReviewCases(exportReport, await loadCaseHistory(), exportReport.reviewCases) };
+      const savedLatest = await getLatestReport();
+      if (!savedLatest || savedLatest.reportId !== exportReport.reportId) throw new Error("A newer report is available. Refresh before downloading.");
+      exportReport = savedLatest;
       setReport(exportReport);
       const response = await fetch("/kohinoor-logo.png", { cache: "no-store" });
       if (!response.ok) throw new Error("The company logo could not be loaded. Please retry the download.");
@@ -203,7 +235,7 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
       await new Promise((resolve) => setTimeout(resolve, 200));
       downloadWorkbook(message.buffer, `Kohinoor-Strength-Report-${exportReport.generatedAt.slice(0, 10)}.xlsx`);
       setProgress(null);
-      setFeedback({ title: "Excel download started", tone: "success", message: "Your workbook includes a worksheet for each category, Strength Detail, Employees, Summary, Validation, and Review Cases Adjustments. Check your browser’s downloads. Your scanned report remains saved here." });
+      setFeedback({ title: "Excel download started", tone: "success", message: "Your workbook includes Summary and a worksheet for each category. Check your browser’s downloads. Your scanned report remains saved here." });
     } catch (error) {
       setProgress(null);
       if (!(error instanceof DOMException && error.name === "AbortError")) setFeedback({ title: "Download could not be prepared", tone: "error", message: error instanceof Error ? error.message : "Try downloading again. Your scanned report is still available." });
@@ -217,11 +249,12 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
     const refresh = async () => {
       if (document.visibilityState !== "visible" || busyRef.current || restoring || employeeRowIndex !== null || reviewOpen || uploadOpen || issuesOpen || feedback) return;
       try {
+        await refreshSavedResult();
         const latest = await loadCurrentTemplate();
         if (busyRef.current || (JSON.stringify(latest) === JSON.stringify(templateRef.current) && (!report || (report.templateSignature === JSON.stringify(latest) && report.matchingVersion === MATCHING_VERSION)))) return;
         templateRef.current = latest;
         setCurrentTemplate(latest);
-        if (storedFile) await processFile(storedFile.file, storedFile.fileName, true, latest);
+        if (storedFile && storedFileReportId.current === reportRef.current?.reportId) await processFile(storedFile.file, storedFile.fileName, true, latest);
       } catch { /* Downloads independently verify freshness and report errors. */ }
     };
     void refresh();
@@ -229,7 +262,7 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
     document.addEventListener("visibilitychange", refresh);
     const timer = window.setInterval(refresh, 15000);
     return () => { window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); window.clearInterval(timer); };
-  }, [storedFile, processFile, restoring, employeeRowIndex, reviewOpen, report, uploadOpen, issuesOpen, feedback]);
+  }, [storedFile, processFile, restoring, employeeRowIndex, reviewOpen, report, uploadOpen, issuesOpen, feedback, refreshSavedResult]);
 
   return <div className="config-page min-h-screen bg-white">
     <header className="border-b border-neutral-200"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-5 px-5 py-6 sm:px-8 lg:px-10"><div><h1 className="text-2xl font-semibold tracking-tight">Turnover Report</h1><p className="mt-1.5 text-sm text-neutral-500">Upload your employee report. Review workforce strength. Download Excel.</p></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={openUpload} disabled={restoring || !!progress}><Upload size={16} />{report ? "Upload new report" : "Upload report"}</Button><Button onClick={download} disabled={!report || !!progress}><Download size={16} /> Download Excel</Button></div></div></header>
@@ -242,13 +275,13 @@ export function TurnoverHome({ template }: { template: StrengthData }) {
         {!!report.unmatched && <p className="mt-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">{report.unmatched.toLocaleString()} unmatched or conflicting employee records are excluded from on-roll counts. Review issues before using the totals.</p>}
 
       </>}
-      {!restoring && report && <ReviewCases report={report} onInteraction={setReviewOpen} onUpdate={async (updated) => {
+      {!restoring && report && <ReviewCases report={report} onInteraction={setReviewOpen} onClose={refreshSavedResult} onUpdate={async (updated) => {
         setReport(updated); reportRef.current = updated;
-        if (storedFile) { try { await storeReport({ version: 1, ...storedFile, result: updated }); } catch { setStorageStatus("Case history is saved, but browser storage failed. A refresh may require reconfirming this upload."); throw new Error("Case history was saved, but browser storage failed. Download now; this upload may need reconfirmation after refresh."); } }
+        if (storedFile) { try { await storeReport({ version: 1, ...storedFile, result: updated }); } catch { setStorageStatus("Case changes are saved in the latest report; the browser cache could not be updated."); } }
       }} />}
       {!restoring && report && <StrengthPanels data={report} onDesignation={setEmployeeRowIndex} />}
       {!report && storageStatus && <p className="mt-4 text-xs text-neutral-500">{storageStatus}</p>}
-      <p className="mt-6 text-xs leading-5 text-neutral-400">Reports are stored on this browser and device. Clearing site data removes saved uploads. Scanning and downloading never change the Strength JSON.</p>
+      <p className="mt-6 text-xs leading-5 text-neutral-400">The latest report and approved cases are saved on this app. The original upload is cached in this browser for reprocessing.</p>
     </main>
     {uploadOpen && <dialog ref={uploadRef} className="config-dialog" aria-labelledby="upload-title" aria-describedby="upload-description" onCancel={() => setUploadOpen(false)}><div className="p-6"><div className="flex justify-between gap-4"><div><h2 id="upload-title" className="text-lg font-semibold tracking-tight">{report ? "Upload a new turnover report" : "Upload turnover report"}</h2><p id="upload-description" className="mt-2 text-sm leading-6 text-neutral-500">Choose a workbook, then start scanning. {report ? "Your current report is replaced only after a successful scan." : "We’ll detect the table and match it to your strength template."}</p></div><Button variant="ghost" size="icon" aria-label="Close upload" onClick={() => setUploadOpen(false)}><X size={16} /></Button></div><div onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); chooseFile(event.dataTransfer.files); }} className="mt-5 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-4 py-7 text-center"><FileSpreadsheet className="mx-auto h-7 w-7 text-neutral-400" /><p className="mt-3 break-all text-sm font-medium">{file ? file.name : "Drop your Excel workbook here"}</p><p className="mt-1 text-xs text-neutral-500">{file ? `${(file.size / 1024 / 1024).toFixed(2)} MB · Ready to scan` : `.xlsx or .xls · Up to ${MAX_FILE_SIZE / 1024 / 1024} MB`}</p><Button variant="outline" className="mt-4" onClick={() => inputRef.current?.click()}>{file ? "Choose another file" : "Browse files"}</Button><input ref={inputRef} aria-label="Turnover workbook" type="file" accept=".xlsx,.xls" className="sr-only" onChange={(event) => { if (event.target.files?.length) chooseFile(event.target.files); event.target.value = ""; }} /></div><details className="mt-5 text-sm"><summary className="cursor-pointer font-medium">Turnover column headers</summary><p className="mt-2 text-xs leading-6 text-neutral-500">{TURNOVER_HEADERS.join(" · ")}</p><p className="mt-2 text-xs leading-5 text-neutral-500">Column order and position can vary. Grade is optional and does not affect matching. Department or Unit must identify the template subcategory. Employee number + Unit identifies a unique employee.</p></details>{uploadError && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{uploadError}</p>}<div className="mt-6 flex justify-end gap-2"><Button variant="outline" onClick={() => setUploadOpen(false)}>Cancel</Button><Button disabled={!file} onClick={() => { if (!file) return; setUploadOpen(false); void processFile(file, file.name); }}><Upload size={16} /> Start scanning</Button></div></div></dialog>}
     {issuesOpen && report && <dialog ref={issuesRef} className="config-dialog !w-[min(760px,calc(100%-32px))]" aria-labelledby="issues-title" onCancel={() => setIssuesOpen(false)}><div className="p-6"><div className="flex items-center justify-between gap-4"><h2 id="issues-title" className="text-lg font-semibold">Validation notes ({report.issues.length})</h2><Button variant="ghost" size="icon" aria-label="Close validation notes" onClick={() => setIssuesOpen(false)}><X size={16} /></Button></div><p className="mt-2 text-sm text-neutral-500">Notes marked Counted do not reduce on-roll strength. Excluded notes explain the missing or conflicting field. Correct those source or configuration values, then reprocess. All notes are included in Excel.</p><div className="mt-5 space-y-3">{report.issues.slice(issuePage * 20, (issuePage + 1) * 20).map((issue, index) => <div key={index} className="rounded-lg border border-neutral-200 p-3"><p className="text-xs font-medium text-neutral-500">{issue.sheet}{issue.row ? ` · Row ${issue.row}` : ""}{issue.employeeId ? ` · Emp # ${issue.employeeId}` : ""}</p>{issue.outcome && <span className={cn("mt-2 inline-block rounded-md px-2 py-1 text-xs font-medium", issue.outcome === "counted" ? "bg-emerald-50 text-emerald-800" : issue.outcome === "excluded" ? "bg-amber-50 text-amber-800" : "bg-neutral-100 text-neutral-600")}>{issue.outcome === "counted" ? "Counted once" : issue.outcome === "excluded" ? "Excluded from on-roll" : "Information"}</span>}<p className="mt-2 text-sm">{issue.message}</p></div>)}{!report.issues.length && <p className="py-6 text-sm text-neutral-500">No validation issues found.</p>}</div><div className="mt-5 flex items-center justify-between gap-2"><Button variant="outline" size="sm" disabled={issuePage === 0} onClick={() => setIssuePage((page) => page - 1)}>Previous</Button><span className="text-xs text-neutral-500">Page {issuePage + 1} of {Math.max(1, Math.ceil(report.issues.length / 20))}</span><Button variant="outline" size="sm" disabled={(issuePage + 1) * 20 >= report.issues.length} onClick={() => setIssuePage((page) => page + 1)}>Next</Button></div></div></dialog>}

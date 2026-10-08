@@ -7,6 +7,8 @@ import {
   addCategory,
   addDesignation,
   addSubcategory,
+  configurationNameKey,
+  validateStrengthData,
   emptyDesignationForm,
   normalizeData,
   toggleDesignationStatus,
@@ -45,6 +47,7 @@ export function ConfigEditor({ initialData }: { initialData: StrengthData }) {
   const [search, setSearch] = useState("");
   const [originalName, setOriginalName] = useState("");
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const savingRef = useRef(false);
   const dirty = JSON.stringify(data) !== savedData;
 
   useEffect(() => {
@@ -127,26 +130,31 @@ export function ConfigEditor({ initialData }: { initialData: StrengthData }) {
   };
 
   const submitModal = () => {
+    if (savingRef.current || !modalMode) return;
     if (modalMode === "category") {
       const name = form.category.trim();
       if (!name) return setError("Category name is required.");
-      if (categories.some((item) => item.category.toLowerCase() === name.toLowerCase())) return setError("This category already exists.");
+      if (name.length > 500) return setError("Category name must be 500 characters or fewer.");
+      if (categories.some((item) => configurationNameKey(item.category) === configurationNameKey(name))) return setError("This category already exists.");
       setData(addCategory(data, name));
       setSelectedCategory(name);
       setSearch("");
     } else if (modalMode === "subcategory") {
       const name = form.subcategory.trim();
       if (!name) return setError("Subcategory name is required.");
+      if (name.length > 500) return setError("Subcategory name must be 500 characters or fewer.");
       if (!selectedCategoryData) return setError("Select a category first.");
-      if (selectedCategoryData.subcategories.some((item) => item.subcategory.toLowerCase() === name.toLowerCase())) return setError("This subcategory already exists.");
+      if (selectedCategoryData.subcategories.some((item) => configurationNameKey(item.subcategory) === configurationNameKey(name))) return setError("This subcategory already exists.");
       setData(addSubcategory(data, form.category, name));
       setSearch("");
     } else if (modalMode === "designation" || modalMode === "edit") {
       const designation = { ...form.designation, designation: form.designation.designation.trim(), grade: form.designation.grade.trim() };
       if (!designation.designation || !designation.grade || !designation.cadre) return setError("Designation, grade, and cadre are required.");
       if (![designation.approvedStrength, designation.onRoll].every((value) => Number.isSafeInteger(value) && value >= 0)) return setError("Strength values must be non-negative whole numbers.");
-      const siblings = selectedCategoryData?.subcategories.find((item) => item.subcategory === form.subcategory)?.designations ?? [];
-      if (siblings.some((item) => item.designation.toLowerCase() === designation.designation.toLowerCase() && (modalMode !== "edit" || item.designation !== originalName))) return setError("This designation already exists in this group.");
+      const group = data.strengthStructure.find((item) => item.category === form.category)?.subcategories.find((item) => item.subcategory === form.subcategory);
+      if (!group || modalMode === "edit" && !group.designations.some((item) => item.designation === originalName)) return setError("This designation group changed. Close the dialog and try again.");
+      const siblings = group.designations;
+      if (siblings.some((item) => configurationNameKey(item.designation) === configurationNameKey(designation.designation) && (modalMode !== "edit" || item.designation !== originalName))) return setError("This designation already exists in this group.");
       setData(modalMode === "edit" ? updateDesignation(data, form.category, form.subcategory, originalName, designation) : addDesignation(data, form.category, form.subcategory, designation));
       setSearch("");
     }
@@ -156,18 +164,23 @@ export function ConfigEditor({ initialData }: { initialData: StrengthData }) {
   };
 
   const handleSave = async () => {
+    if (savingRef.current || !dirty || modalMode) return;
+    savingRef.current = true;
     setIsSaving(true);
     setError("");
     try {
-      const result = await saveStrengthData(data);
+      validateStrengthData(data);
+      const result = await saveStrengthData(data, savedData);
+      setData(result);
       setSavedData(JSON.stringify(result));
       setSavedAt(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Karachi" }));
       setFeedback({ title: "Configuration saved", tone: "success", message: "Your strength configuration has been saved successfully. The Home Page will use this template when processing reports." });
-    } catch {
+    } catch (error) {
       setError("The configuration could not be saved. Please try again.");
-      setFeedback({ title: "Configuration could not be saved", tone: "error", message: "Your changes remain on this page. Try Save changes again before leaving or refreshing." });
+      setFeedback({ title: "Configuration could not be saved", tone: "error", message: `${error instanceof Error ? error.message : "Please retry."} Your changes remain on this page. Try Save changes again before leaving or refreshing.` });
     } finally {
       setIsSaving(false);
+      savingRef.current = false;
     }
   };
 
@@ -198,7 +211,7 @@ export function ConfigEditor({ initialData }: { initialData: StrengthData }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-[1440px] px-5 py-7 sm:px-8 lg:px-10">
+      <main className="mx-auto max-w-[1440px] px-5 py-7 sm:px-8 lg:px-10"><fieldset disabled={isSaving} className="min-w-0">
         <section aria-label="Workforce overview" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <MetricCard label="Approved strength" value={totals.approved.toLocaleString()} description="Total sanctioned positions" />
           <MetricCard label="On-roll" value={totals.onRoll.toLocaleString()} description="Current workforce" />
@@ -266,7 +279,7 @@ export function ConfigEditor({ initialData }: { initialData: StrengthData }) {
             </div>
           </div>
         </div>
-      </main>
+      </fieldset></main>
 
       {modalMode && (
         <dialog ref={dialogRef} aria-labelledby="config-dialog-title" aria-describedby="config-dialog-description" onCancel={closeModal} className="config-dialog" onClick={(event) => { if (event.target === event.currentTarget) closeModal(); }}>
@@ -299,7 +312,7 @@ export function ConfigEditor({ initialData }: { initialData: StrengthData }) {
                 <label className="block text-sm font-medium text-slate-700 sm:col-span-2">Designation<input autoFocus required value={form.designation.designation} onChange={(event) => setForm({ ...form, designation: { ...form.designation, designation: event.target.value } })} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-neutral-400" placeholder="e.g. Operator" /></label>
                 <label className="block text-sm font-medium text-slate-700">Grade<input required value={form.designation.grade} onChange={(event) => setForm({ ...form, designation: { ...form.designation, grade: event.target.value } })} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-neutral-400" placeholder="E-03" /></label>
                 <label className="block text-sm font-medium text-slate-700">Cadre<select value={form.designation.cadre} onChange={(event) => setForm({ ...form, designation: { ...form.designation, cadre: event.target.value } })} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-neutral-400"><option value="" disabled>Select cadre</option><option>Staff</option><option>Worker</option></select></label>
-                <label className="block text-sm font-medium text-slate-700">Approved strength<input type="number" min="0" value={form.designation.approvedStrength} onChange={(event) => setForm({ ...form, designation: { ...form.designation, approvedStrength: Number(event.target.value) } })} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-neutral-400" /></label>
+                <label className="block text-sm font-medium text-slate-700">Approved strength<input type="number" required min="0" step="1" max={Number.MAX_SAFE_INTEGER} value={form.designation.approvedStrength} onChange={(event) => setForm({ ...form, designation: { ...form.designation, approvedStrength: Number(event.target.value) } })} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-neutral-400" /></label>
                 <label className="block text-sm font-medium text-slate-700">On-roll<input type="number" min="0" value={form.designation.onRoll} onChange={(event) => setForm({ ...form, designation: { ...form.designation, onRoll: Number(event.target.value) } })} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-neutral-400" /></label>
                 <label className="block text-sm font-medium text-slate-700 sm:col-span-2">Status<select value={form.designation.status} onChange={(event) => setForm({ ...form, designation: { ...form.designation, status: event.target.value as Designation["status"] } })} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-neutral-400"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></label>
               </div>
