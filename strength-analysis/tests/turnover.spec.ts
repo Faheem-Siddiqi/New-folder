@@ -208,21 +208,12 @@ test("department aliases and differing grades count employees, harmless duplicat
   await expect(page.getByRole("heading", { name: "Ring Employee", exact: true })).toBeVisible();
   await expect(page.getByText("M-99", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Close employee details", exact: true }).click();
-  await page.evaluate(() => new Promise<void>((resolve, reject) => {
-    const request = indexedDB.open("kohinoor-turnover", 1);
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => {
-      const db = request.result;
-      const transaction = db.transaction("reports", "readwrite");
-      const store = transaction.objectStore("reports");
-      const saved = store.get("latest");
-      saved.onsuccess = () => { const previous = saved.result; previous.result.matchingVersion = 0; store.put(previous, "latest"); };
-      transaction.oncomplete = () => { db.close(); resolve(); };
-      transaction.onerror = () => reject(transaction.error);
-    };
-  }));
+  const saved = JSON.parse(await readFile("../strength-last-result.json", "utf8"));
+  saved.result.matchingVersion = 0;
+  await writeFile("../strength-last-result.json", JSON.stringify(saved));
   await page.reload();
-  await expect(page.getByRole("dialog", { name: "Saved upload reprocessed", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Refresh saved report", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Saved report refreshed", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Got it" }).click();
   await page.getByRole("navigation", { name: "Report categories", exact: true }).getByRole("button", { name: "RING", exact: true }).click();
   await designation.click();

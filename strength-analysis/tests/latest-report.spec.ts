@@ -141,3 +141,80 @@ test("configuration validates duplicate names and preserves staged changes after
   await expect(page.getByText("Unsaved changes", { exact: true })).toBeVisible();
   expect(await readFile(STRENGTH_FILE, "utf8")).toBe(before);
 });
+
+test("empty history displays immediately, background checks do not block upload, and save errors remain readable", async ({ page, request }) => {
+  const path = "../strength-last-result.json";
+  const before = await readFile(path, "utf8");
+  try {
+    await writeFile(path, JSON.stringify({ version: 1, result: null }));
+    await page.addInitScript(() => {
+      Object.defineProperty(window, "indexedDB", { get() { throw new Error("Browser storage must not block empty history"); } });
+    });
+    let release: (() => void) | undefined;
+    let hold = true;
+    await page.route("**/api/latest-report", async (route) => {
+      if (hold) { hold = false; await new Promise<void>((resolve) => { release = resolve; }); }
+      await route.continue();
+    });
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "Start with your turnover report" })).toBeVisible();
+    await expect(page.getByText("Checking for your saved report…")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Upload report", exact: true })).toBeEnabled();
+    await page.getByRole("button", { name: "Upload report", exact: true }).click();
+    await expect(page.getByRole("dialog", { name: "Upload turnover report" })).toBeVisible();
+    await expect.poll(() => !!release).toBe(true);
+    release!();
+    const empty = await request.get("/api/latest-report");
+    expect((await empty.json()).result).toBeNull();
+    const unchanged = await request.get("/api/latest-report", { headers: { "If-None-Match": empty.headers().etag } });
+    expect(unchanged.status()).toBe(304);
+
+    const tree = JSON.parse(await readFile(STRENGTH_FILE, "utf8"));
+    const category = tree.strengthStructure[0];
+    const section = category.subcategories[0];
+    const designation = section.designations[0];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([[...TURNOVER_HEADERS], [section.subcategory, "KGM", "001", "Employee", designation.designation, "M", "Sunday", designation.grade, "A", designation.cadre, category.category, "2024-01-01"]]), "Employees");
+    const upload = { name: "readable-failure.xlsx", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buffer: XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) };
+    await writeFile(path, "{broken");
+    await page.getByLabel("Turnover workbook", { exact: true }).setInputFiles(upload);
+    await page.getByRole("button", { name: "Start scanning" }).click();
+    const failure = page.getByRole("dialog", { name: "Report could not be processed" });
+    await expect(failure.getByText(/strength-last-result.json could not be read/)).toBeVisible();
+    await expect(failure.getByText(/Minified React/)).toHaveCount(0);
+    expect(await readFile(path, "utf8")).toBe("{broken");
+    const corrupt = await request.get("/api/latest-report", { headers: { "If-None-Match": empty.headers().etag } });
+    expect(corrupt.status()).toBe(500);
+    expect((await corrupt.json()).error).toMatch(/could not be read/);
+    await failure.getByRole("button", { name: "Got it" }).click();
+    await writeFile(path, JSON.stringify({ version: 1, result: null }));
+    await page.getByRole("button", { name: "Upload report", exact: true }).click();
+    await page.getByLabel("Turnover workbook", { exact: true }).setInputFiles(upload);
+    await page.getByRole("button", { name: "Start scanning" }).click();
+    await expect(page.getByRole("dialog", { name: "Report ready", exact: true })).toBeVisible();
+    expect(JSON.parse(await readFile(path, "utf8")).result.fileName).toBe(upload.name);
+  } finally { await writeFile(path, before); }
+});
+
+test("the existing full report can be saved through the JSON endpoint", async ({ request }) => {
+  const path = "../strength-last-result.json";
+  const before = await readFile(path, "utf8");
+  const original = JSON.parse(before).result;
+  test.skip(!original, "No existing report to exercise the full saved payload.");
+  try {
+    const scanned = { ...original };
+    delete scanned.reportId;
+    delete scanned.revision;
+    delete scanned.reviewCases;
+    const response = await request.post("/api/turnover", { data: { result: scanned } });
+    const saved = await response.json();
+    expect(saved.ok, saved.error).toBe(true);
+    expect(saved.result.employees).toEqual(scanned.employees);
+    expect(saved.result.rows).toEqual(scanned.rows);
+    const invalid = await request.post("/api/turnover", { data: { result: { ...scanned, rows: [{ ...scanned.rows[0], onRoll: -1 }] } } });
+    const failure = await invalid.json();
+    expect(failure.ok).toBe(false);
+    expect(failure.error).toMatch(/Invalid latest report/);
+    expect(JSON.parse(await readFile(path, "utf8")).result.reportId).toBe(saved.result.reportId);
+  } finally { await writeFile(path, before); }
+});

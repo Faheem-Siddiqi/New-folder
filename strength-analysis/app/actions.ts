@@ -5,8 +5,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { normalizeData, validateStrengthData, type StrengthData } from "@/lib/strength-data";
 import { STRENGTH_FILE } from "@/lib/strength-file";
-import { readLatestReport, saveProcessedReport, saveLatestCase } from "@/lib/latest-report";
-import type { TurnoverResult } from "@/lib/turnover-contracts";
+import { saveLatestCase } from "@/lib/latest-report";
 import { validResolution, resolutionAllowed, type Resolution } from "@/lib/review-cases";
 import { strengthRows } from "@/lib/strength-rows";
 
@@ -40,14 +39,6 @@ export async function saveStrengthData(data: StrengthData, expected?: string) {
 
 export async function getStrengthData() {
   return readStrengthData();
-}
-
-export async function getLatestReport() {
-  return readLatestReport();
-}
-
-export async function saveTurnoverResult(value: TurnoverResult, expectedReportId?: string) {
-  return saveProcessedReport(value, expectedReportId);
 }
 
 export async function saveCaseResolution(value: Resolution, reportId: string, revision: number) {

@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import { buildReviewCases, scenarioKey, validResolution, type Resolution } from "./review-cases.ts";
 import { TURNOVER_HEADERS, type TurnoverResult } from "./turnover-contracts.ts";
+import { refreshReport } from "./refresh-report.ts";
+import type { StrengthData } from "./strength-data.ts";
 
 export const LATEST_REPORT_FILE = resolve(process.cwd(), "..", "strength-last-result.json");
 let queue: Promise<unknown> = Promise.resolve();
@@ -44,8 +46,9 @@ async function writeLatestReport(result: TurnoverResult, path: string) {
 }
 export function previousCases(report: TurnoverResult, previous: TurnoverResult | null): Resolution[] {
   if (!previous) return [];
+  const oldRows = new Map(previous.rows.map((row) => [scenarioKey({ ...row, caseNumber: 1 }), row]));
   const eligible = new Set(report.rows.filter((row) => {
-    const old = previous.rows.find((item) => scenarioKey({ ...item, caseNumber: 1 }) === scenarioKey({ ...row, caseNumber: 1 }));
+    const old = oldRows.get(scenarioKey({ ...row, caseNumber: 1 }));
     return old && row.approvedStrength - row.onRoll < 0 && row.approvedStrength - row.onRoll === old.approvedStrength - old.onRoll;
   }).map((row) => scenarioKey({ ...row, caseNumber: 1 })));
   return (previous.reviewCases ?? []).flatMap((entry) => {
@@ -78,6 +81,17 @@ export function saveLatestCase(resolution: Resolution, reportId: string, revisio
       return { ...entry, ...(suggestion ? { suggestion } : {}) };
     }) };
     if (!next.reviewCases.find((entry) => entry.key === key)?.resolution) throw new Error("Choose a valid post in the same subcategory.");
+    await writeLatestReport(next, path);
+    return next;
+  });
+}
+
+export function refreshLatestReport(template: StrengthData, expectedReportId: string, path = LATEST_REPORT_FILE) {
+  return serialized(async () => {
+    const previous = await readLatestReport(path);
+    if (!previous || previous.reportId !== expectedReportId) throw new Error("The saved report changed. Reload Home before refreshing it.");
+    const refreshed = refreshReport(previous, template);
+    const next: TurnoverResult = { ...refreshed, reportId: randomUUID(), revision: 0, reviewCases: buildReviewCases(refreshed, previousCases(refreshed, previous)) };
     await writeLatestReport(next, path);
     return next;
   });
