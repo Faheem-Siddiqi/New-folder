@@ -1706,11 +1706,19 @@
     {
       "subcategory": "COMPRESSOR/XORELLA",
       "designations": [
-        {
+         {
           "designation": "HEAD FITTER",
           "grade": "E-04",
           "cadre": "Worker",
           "approvedStrength": 1,
+          "onRoll": 0,
+          "status": "Active"
+        },
+        {
+          "designation": "LABOUR",
+          "grade": "E-01",
+          "cadre": "Worker",
+          "approvedStrength": 2,
           "onRoll": 0,
           "status": "Active"
         }
