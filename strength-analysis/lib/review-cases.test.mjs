@@ -12,7 +12,7 @@ const resolution = (report, caseNumber, overrides = {}) => ({ ...caseIdentity(re
 
 test("negative three creates three designation cases, with no employee selection", () => {
   const report = makeReport();
-  const cases = buildReviewCases(report, []);
+  const cases = buildReviewCases(report);
   assert.deepEqual(cases.map(entry => entry.caseNumber), [1,2,3]);
   assert.ok(cases.every(entry => entry.rowIndex === 0 && !("recordIndex" in entry)));
   assert.deepEqual(againstPostOptions(report.rows, row), ["ASSISTANT MANAGER"]);
@@ -24,7 +24,7 @@ test("negative three creates three designation cases, with no employee selection
 
 test("one Against Post, one Social Security and one Other clear -3 to zero without editing strength or headcount", () => {
   const report = makeReport();
-  report.reviewCases = buildReviewCases(report, []);
+  report.reviewCases = buildReviewCases(report);
   assert.equal(vacancyFor(report,0), -3);
   report.reviewCases[0].resolution = resolution(report,1);
   assert.equal(vacancyFor(report,0), -2);
@@ -37,24 +37,16 @@ test("one Against Post, one Social Security and one Other clear -3 to zero witho
   assert.equal(report.employees.length,4);
 });
 
-test("history is suggested by designation and case number; only same-upload confirmations carry forward", () => {
+test("only valid current report cases carry forward", () => {
   const report = makeReport();
-  const saved = resolution(report,1);
-  let cases = buildReviewCases(report,[saved]);
-  assert.deepEqual(cases[0].suggestion,saved);
-  assert.equal(cases[0].resolution,undefined);
-  report.employees[0].employee["Emp #"]="NEW EMPLOYEE";
-  report.rows[0].grade="M-99";
-  assert.deepEqual(buildReviewCases(report,[saved])[0].suggestion,saved);
-  cases[0].resolution=saved;
-  assert.equal(buildReviewCases(report,[saved],cases)[0].resolution.id,saved.id);
-  assert.equal(buildReviewCases(report,[saved])[0].resolution,undefined);
-  const removed = {...report,rows:[report.rows[0],report.rows[2]]};
-  assert.equal(buildReviewCases(removed,[saved],cases)[0].resolution,undefined);
-  assert.equal(buildReviewCases(removed,[saved],cases)[0].suggestion,undefined);
-  assert.ok(buildReviewCases(report,[{...saved,subcategory:"Another Department"}]).every(entry=>!entry.suggestion));
-  report.rows[0].approvedStrength=3;
-  assert.equal(buildReviewCases(report,[saved],cases).length,1);
+  const cases = buildReviewCases(report);
+  cases[0].resolution = resolution(report, 1);
+  assert.equal(buildReviewCases(report, cases)[0].resolution.id, cases[0].resolution.id);
+  assert.equal(buildReviewCases(report)[0].resolution, undefined);
+  const removed = { ...report, rows: [report.rows[0], report.rows[2]] };
+  assert.equal(buildReviewCases(removed, cases)[0].resolution, undefined);
+  report.rows[0].approvedStrength = 3;
+  assert.equal(buildReviewCases(report, cases).length, 1);
 });
 
 test("Excel includes all saved case explanations beside adjusted vacancies with only category and summary sheets", async () => {

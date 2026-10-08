@@ -1,18 +1,9 @@
 import { test, expect } from "@playwright/test";
 import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { TURNOVER_HEADERS } from "../lib/turnover-contracts";
 import { STRENGTH_FILE } from "../lib/strength-file";
-
-let previousResult: string;
-test.beforeEach(async () => {
-  previousResult = await readFile("../strength-last-result.json", "utf8");
-  await writeFile("../strength-last-result.json", JSON.stringify({ version: 1, result: null }));
-});
-test.afterEach(async () => {
-  await writeFile("../strength-last-result.json", previousResult);
-});
 
 async function sampleUpload() {
   const template = JSON.parse(await readFile(STRENGTH_FILE, "utf8"));
@@ -36,7 +27,7 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   await page.getByRole("button", { name: "Start scanning" }).click();
   await expect(page.getByRole("dialog", { name: "Report ready", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Got it" }).click();
-  await expect(page.getByText("Latest report saved. Available after refresh or reopening.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Report saved for this tab. Closing the tab clears it.", { exact: true })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "Status", exact: true })).toHaveCount(0);
   const designationButton = page.getByRole("button", { name: "View employees for BACK PROCESS INCHARGE, M-13, in Spinning-BlowRoom, BACKPROCESS", exact: true });
   await designationButton.click();
@@ -53,7 +44,7 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   await page.screenshot({ path: "test-results/employees-desktop.png", fullPage: false });
   await page.keyboard.press("Escape");
   await expect(employeeDialog).toHaveCount(0);
-  await page.getByRole("button", { name: "View employees for ASSISTANT FOREMAN, M-11, in Spinning-BlowRoom, BACKPROCESS", exact: true }).click();
+  await page.getByRole("button", { name: "View employees for FOREMAN, M-12, in Spinning-BlowRoom, BACKPROCESS", exact: true }).click();
   await expect(page.getByRole("heading", { name: "No on-roll employees in this designation" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Sample Employee", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Close employee details", exact: true }).click();
@@ -72,7 +63,7 @@ test("upload, refresh persistence, navigation, failed replacement, and Excel dow
   await page.getByRole("button", { name: "Show all subcategories", exact: true }).click();
   await page.screenshot({ path: "test-results/home-desktop.png", fullPage: false });
   await page.reload();
-  await expect(page.getByText("Restored from the latest saved report.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Restored from this tab's session.", { exact: true })).toBeVisible();
   await expect(page.getByText("sample-turnover.xlsx", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "Configuration", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Strength Configuration", exact: true })).toBeVisible();
@@ -172,13 +163,13 @@ test("a failed current-data check prevents a stale export and preserves the scan
   await page.getByRole("button", { name: "Got it" }).click();
   let downloads = 0;
   page.on("download", () => downloads++);
-  await page.route("**/", (route) => route.request().method() === "POST" ? route.abort() : route.continue());
+  await page.route("**/api/turnover", (route) => route.abort());
   await page.getByRole("button", { name: "Download Excel", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Download could not be prepared", exact: true })).toBeVisible();
   expect(downloads).toBe(0);
   await page.getByRole("button", { name: "Got it" }).click();
   await expect(page.getByText("sample-turnover.xlsx", { exact: true })).toBeVisible();
-  await page.unroute("**/");
+  await page.unroute("**/api/turnover");
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download Excel", exact: true }).click();
   await download;
@@ -208,12 +199,10 @@ test("department aliases and differing grades count employees, harmless duplicat
   await expect(page.getByRole("heading", { name: "Ring Employee", exact: true })).toBeVisible();
   await expect(page.getByText("M-99", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Close employee details", exact: true }).click();
-  const saved = JSON.parse(await readFile("../strength-last-result.json", "utf8"));
-  saved.result.matchingVersion = 0;
-  await writeFile("../strength-last-result.json", JSON.stringify(saved));
+  await page.evaluate(() => { const key = "strength-analysis:session-report:v1"; const saved = JSON.parse(sessionStorage.getItem(key)!); saved.matchingVersion = 0; sessionStorage.setItem(key, JSON.stringify(saved)); });
   await page.reload();
-  await page.getByRole("button", { name: "Refresh saved report", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: "Saved report refreshed", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Refresh session report", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Session report refreshed", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Got it" }).click();
   await page.getByRole("navigation", { name: "Report categories", exact: true }).getByRole("button", { name: "RING", exact: true }).click();
   await designation.click();

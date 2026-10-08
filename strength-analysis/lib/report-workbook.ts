@@ -63,7 +63,7 @@ export async function createReportWorkbook(result: TurnoverResult, logo?: string
       ] });
     }
   };
-  const cases = buildReviewCases(result, [], result.reviewCases ?? []);
+  const cases = buildReviewCases(result, result.reviewCases ?? []);
   const view = strengthView(result);
   const summary = makeSheet("Summary", Array(8).fill(""), [3, 43, 17, 17, 4, 44, 17, 17], "Approved and on-roll strength by subcategory and category.");
   summary.getCell("C1").value = "Strength Summary";

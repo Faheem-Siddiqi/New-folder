@@ -2,13 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { saveCaseResolution } from "@/app/actions";
+import { updateSessionCase } from "@/lib/session-report";
 import { againstPostOptions, caseIdentity, vacancyFor, resolutionLabel, reviewColors, type Resolution, type ReviewCase } from "@/lib/review-cases";
 import type { TurnoverResult } from "@/lib/turnover-contracts";
 import { Button } from "./ui/button";
 import { FeedbackDialog, type Feedback } from "./feedback-dialog";
 
-export function ReviewCases({ report, onUpdate, onInteraction, onClose }: { report: TurnoverResult; onUpdate: (report: TurnoverResult) => Promise<void>; onInteraction: (open: boolean) => void; onClose: () => Promise<void> }) {
+export function ReviewCases({ report, onUpdate }: { report: TurnoverResult; onUpdate: (report: TurnoverResult) => Promise<void> }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -21,19 +21,17 @@ export function ReviewCases({ report, onUpdate, onInteraction, onClose }: { repo
   const pending = cases.filter((entry) => !entry.resolution).length;
   const groups = [...new Set(cases.map((entry) => entry.rowIndex))].filter((index) => { const row = report.rows[index]; return `${row.category} ${row.subcategory} ${row.designation}`.toLowerCase().includes(query.toLowerCase().trim()); });
   useEffect(() => {
-    onInteraction(open);
     if (!open) return;
     const dialog = ref.current;
     dialog?.showModal();
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { dialog?.close(); document.body.style.overflow = overflow; onInteraction(false); };
-  }, [open, onInteraction]);
+    return () => { dialog?.close(); document.body.style.overflow = overflow; };
+  }, [open]);
   async function closeReview() {
     if (savingRef.current) return;
     setOpen(false);
     setFeedback(null);
-    await onClose();
   }
   async function confirm(entry: ReviewCase, target: string, reason = "") {
     if (savingRef.current || !target || target === "__other__" && !reason.trim()) return false;
@@ -41,10 +39,7 @@ export function ReviewCases({ report, onUpdate, onInteraction, onClose }: { repo
     setSavingKey(entry.key); setFeedback(null);
     try {
       const resolution: Resolution = { ...caseIdentity(report, entry.rowIndex, entry.caseNumber), id: crypto.randomUUID(), caseType: target === "__social_security__" ? "Social Security Leave" : target === "__other__" ? "Other" : "Against Post", assignedAgainstDesignation: target.startsWith("post:") ? target.slice(5) : null, ...(target === "__other__" ? { otherReason: reason.trim() } : {}), resolvedAt: new Date().toISOString() };
-      if (!report.reportId) throw new Error("Upload the turnover workbook to save this report first.");
-      const response = await saveCaseResolution(resolution, report.reportId, report.revision ?? 0);
-      if (!response.ok) throw new Error(response.error);
-      await onUpdate(response.result);
+      await onUpdate(updateSessionCase(report, resolution));
       setFeedback({ title: entry.resolution ? "Case updated" : "Case saved", tone: "success", message: entry.resolution ? "Your updated case is saved. The vacancy has been recalculated." : "Your case is saved. The designation's vacancy has been adjusted by 1." });
       return true;
     } catch (error) { setFeedback({ title: "Case could not be saved", tone: "error", message: `${error instanceof Error ? error.message : "Please retry."} Your entered values are still available.` }); return false; }
@@ -67,12 +62,9 @@ function CaseEditor({ report, entry, disabled, saving, onConfirm }: { report: Tu
   const [target, setTarget] = useState(targetValue(entry.resolution));
   const [reason, setReason] = useState(entry.resolution?.otherReason ?? "");
   const [changing, setChanging] = useState(false);
-  const [changingSuggestion, setChangingSuggestion] = useState(false);
   const options = againstPostOptions(report.rows, report.rows[entry.rowIndex]);
-  const suggestion = entry.suggestion;
   return <div data-testid="designation-case" className="py-4 first:pt-0 last:pb-0"><p className="mb-2 text-xs font-semibold">Case {entry.caseNumber}</p>
     {entry.resolution && !changing && !saving ? <div className="flex flex-wrap items-center justify-between gap-2"><p className={`rounded-lg border px-3 py-2 text-sm ${reviewColors[entry.resolution.caseType].className}`}>{resolutionLabel(entry.resolution)} · Saved</p><Button variant="outline" size="sm" disabled={disabled} onClick={() => { setTarget(targetValue(entry.resolution)); setReason(entry.resolution?.otherReason ?? ""); setChanging(true); }}>Edit</Button></div> : <>
-      {!entry.resolution && suggestion && !changingSuggestion && <div className="mb-3 rounded-lg border border-blue-200 bg-blue-50 p-3"><p className="text-xs font-medium text-blue-900">Previous Match Found</p><p className="mt-1 text-xs text-blue-800">{resolutionLabel(suggestion)}. Apply this previous case?</p><div className="mt-3 flex gap-2"><Button size="sm" disabled={disabled} onClick={() => onConfirm(targetValue(suggestion), suggestion.otherReason)}>{saving ? "Saving..." : "OK, approve"}</Button><Button variant="outline" size="sm" disabled={disabled} onClick={() => setChangingSuggestion(true)}>Change</Button></div></div>}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end"><label className="block min-w-0 flex-1 text-xs font-medium">Case type<select aria-label={`Case ${entry.caseNumber} for ${report.rows[entry.rowIndex].designation}`} disabled={disabled} value={target} onChange={(event) => setTarget(event.target.value)} className="mt-2 h-10 w-full rounded-lg border border-neutral-200 bg-white px-3 text-sm"><option value="">Select an option</option><option value="__social_security__">Social Security</option><optgroup label="Against Post - Designations">{options.map((designation) => <option key={designation} value={`post:${designation}`}>{designation}</option>)}</optgroup><option value="__other__">Other (type text)</option></select></label><Button size="sm" aria-busy={saving} disabled={disabled || !target || target === "__other__" && !reason.trim()} onClick={async () => { if (await onConfirm(target, reason)) setChanging(false); }}>{saving ? "Saving..." : "Save case"}</Button>{changing && <Button variant="outline" size="sm" disabled={disabled} onClick={() => { setTarget(targetValue(entry.resolution)); setReason(entry.resolution?.otherReason ?? ""); setChanging(false); }}>Cancel change</Button>}</div>
       {target === "__other__" && <label className="mt-3 block text-xs font-medium">Other reason<input aria-label={`Other reason for case ${entry.caseNumber} of ${report.rows[entry.rowIndex].designation}`} value={reason} maxLength={200} disabled={disabled} onChange={(event) => setReason(event.target.value)} placeholder="Type the reason for this case" className="mt-2 h-10 w-full rounded-lg border border-neutral-200 px-3 text-sm" /></label>}
     </>}
