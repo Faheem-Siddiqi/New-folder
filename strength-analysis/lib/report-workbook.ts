@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
-import { buildReviewCases, caseIdentity, confirmedAdjustments, vacancyFor, resolutionLabel, reviewColors } from "./review-cases.ts";
+import { buildReviewCases, confirmedAdjustments, vacancyFor, resolutionLabel } from "./review-cases.ts";
 import { strengthView } from "./strength-summary.ts";
-import { TURNOVER_HEADERS, type TurnoverResult } from "./turnover-contracts.ts";
+import { type TurnoverResult } from "./turnover-contracts.ts";
 
 export async function createReportWorkbook(result: TurnoverResult, logo?: string, progress: (step: string, percent: number) => void = () => {}) {
   const workbook = new ExcelJS.Workbook();
@@ -63,45 +63,56 @@ export async function createReportWorkbook(result: TurnoverResult, logo?: string
       ] });
     }
   };
-  const cases = result.reviewCases ?? buildReviewCases(result, []);
-  const tint = (cell: ExcelJS.Cell, kind: keyof typeof reviewColors) => {
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: reviewColors[kind].fill } };
-    cell.font = { name: "Calibri", size: 11, color: { argb: reviewColors[kind].text } };
-  };
-  const annotateStrength = (sheet: ExcelJS.Worksheet, rows: typeof result.rows, column: number) => {
-    const headers = ["Against Post Cases", "Social Security Cases", "Other Cases", "Saved Cases", "Raw Vacancies"];
-    headers.forEach((header, offset) => { sheet.getCell(6, column + offset).value = header; sheet.getColumn(column + offset).width = 25; sheet.getCell(6, column + offset).style = { ...sheet.getCell(6, 1).style }; });
-    rows.forEach((row, index) => {
-      const rowIndex = result.rows.indexOf(row);
-      const related = cases.filter((entry) => entry.rowIndex === rowIndex && entry.resolution);
-      (["Against Post", "Social Security Leave", "Other"] as const).forEach((kind, offset) => { const count = related.filter((entry) => entry.resolution?.caseType === kind).length; sheet.getCell(index + 7, column + offset).value = count; if (count) tint(sheet.getCell(index + 7, column + offset), kind); });
-      const saved = confirmedAdjustments({ ...result, reviewCases: cases }, rowIndex);
-      sheet.getCell(index + 7, column + 3).value = { formula: `SUM(${sheet.getColumn(column).letter}${index + 7}:${sheet.getColumn(column + 2).letter}${index + 7})`, result: saved };
-      sheet.getCell(index + 7, column + 4).value = row.approvedStrength - row.onRoll;
-      sheet.getCell(index + 7, column - 1).value = { formula: `${sheet.getColumn(column - 3).letter}${index + 7}-${sheet.getColumn(column - 2).letter}${index + 7}+${sheet.getColumn(column + 3).letter}${index + 7}`, result: vacancyFor({ ...result, reviewCases: cases }, rowIndex) };
-    });
-    sheet.autoFilter = { from: { row: 6, column: 1 }, to: { row: Math.max(6, sheet.rowCount), column: column + 4 } };
-  };
+  const cases = buildReviewCases(result, [], result.reviewCases ?? []);
   const view = strengthView(result);
   const summary = makeSheet("Summary", Array(8).fill(""), [3, 43, 17, 17, 4, 44, 17, 17], "Approved and on-roll strength by subcategory and category.");
   summary.getCell("C1").value = "Strength Summary";
-  const details = makeSheet("Strength Detail", ["Category", "Subcategory", "Designation", "Grade", "Cadre", "Approved Strength", "On-Roll Employee Count", "Vacancies"], [35, 48, 38, 14, 16, 23, 27, 18], "Designation metadata and approved strength come from the Strength JSON. On-roll counts come only from uniquely matched uploaded employees. Vacancies include saved designation cases. Approved strength and uploaded on-roll counts remain unchanged; raw vacancies are shown separately.");
-  const employeeSheet = makeSheet("Employees", [...TURNOVER_HEADERS, "Template Category", "Template Subcategory", "Template Designation", "Template Grade", "Template Cadre", "Template Approved Strength", "Mapping Result", "Source Sheet", "Source Row"], [38, 18, 17, 32, 32, 13, 15, 13, 16, 20, 24, 20, 32, 45, 35, 16, 18, 26, 64, 26, 14], "The first 12 columns preserve uploaded employee information in the required sequence. Template fields are shown separately; the JSON does not contain employee names or IDs. Repeated employee number/unit records count once; differences in shift or rest day do not exclude employees.");
-  const validation = makeSheet("Validation", ["Source Sheet", "Source Row", "Emp #", "Issue", "Effect on Count"], [30, 16, 20, 100, 24], "Employees matching department and designation are counted; uploaded grade is not checked. Repeated employee number/unit records count once. Only conflicting identity or strength fields exclude duplicates. Each note explains whether a record is counted or excluded.");
-  result.rows.forEach((row, index) => details.addRow([row.category, row.subcategory, row.designation, row.grade, row.cadre, row.approvedStrength, row.onRoll, { formula: `F${index + 7}-G${index + 7}`, result: row.approvedStrength - row.onRoll }]));
-  finish(details, [6, 7, 8], 8);
-  annotateStrength(details, result.rows, 9);
+  const totals = new Map<string, { sheet: string; subcategory: string; row: number }[]>();
   const categories = [...new Set([...result.categories, ...result.rows.map((row) => row.category)])];
   categories.forEach((category, categoryIndex) => {
-    progress(`Building ${category} worksheet`, 15 + Math.round(categoryIndex / categories.length * 40));
+    progress(`Building ${category} worksheet`, 15 + Math.round(categoryIndex / categories.length * 60));
     const categoryRows = result.rows.filter((row) => row.category === category);
-    const sheet = makeSheet(category, ["Subcategory", "Designation", "Grade", "Cadre", "Approved Strength", "On-Roll Employee Count", "Vacancies"], [48, 38, 14, 16, 24, 28, 18], "Vacancies = approved minus uploaded on-roll plus saved designation cases. Raw vacancies and each case type are shown separately.");
-    categoryRows.forEach((row, index) => sheet.addRow([row.subcategory, row.designation, row.grade, row.cadre, row.approvedStrength, row.onRoll, { formula: `E${index + 7}-F${index + 7}`, result: row.approvedStrength - row.onRoll }]));
-    finish(sheet, [5, 6, 7], 7);
-    annotateStrength(sheet, categoryRows, 8);
+    const sheet = makeSheet(category, ["Sr#", "Designation", "Grade", "Cadre Staff/Worker", "Approved", "Onroll", "Vacancies", "Cases"], [7, 38, 12, 18, 14, 14, 14, 60], "Vacancies = approved minus on-roll plus saved cases. Cases explain excess headcount; pending cases still need review.");
+    sheet.getCell("C1").value = "KOHINOOR TEXTILE MILLS LIMITED";
+    sheet.getCell("C2").value = "Gujar Khan Division";
+    sheet.getCell("A3").value = `STRENGTH CHART — ${category} | ${result.generatedAt.slice(0, 10)}`;
+    const sectionTotals: { sheet: string; subcategory: string; row: number }[] = [];
+    const headings: number[] = [];
+    const dataRows: number[] = [];
+    const caseText = new Map<number, string>();
+    for (const subcategory of new Set(categoryRows.map((row) => row.subcategory))) {
+      const heading = sheet.addRow([subcategory]);
+      sheet.mergeCells(heading.number, 1, heading.number, 8);
+      headings.push(heading.number);
+      const section = categoryRows.filter((row) => row.subcategory === subcategory);
+      const first = sheet.rowCount + 1;
+      section.forEach((row, index) => {
+        const rowIndex = result.rows.indexOf(row);
+        const related = cases.filter((entry) => entry.rowIndex === rowIndex);
+        const text = related.map((entry) => `Case ${entry.caseNumber}: ${entry.resolution ? resolutionLabel(entry.resolution) : "Pending review"}`).join("\n");
+        const number = sheet.rowCount + 1;
+        const saved = confirmedAdjustments({ ...result, reviewCases: cases }, rowIndex);
+        sheet.addRow([index + 1, row.designation, row.grade, row.cadre, row.approvedStrength, row.onRoll, { formula: `E${number}-F${number}+${saved}`, result: vacancyFor({ ...result, reviewCases: cases }, rowIndex) }, text]);
+        dataRows.push(number);
+        if (text) caseText.set(number, text);
+      });
+      const last = sheet.rowCount;
+      const total = sheet.addRow(["", "Total", "", "", ...["E", "F", "G"].map((column, index) => ({ formula: `SUM(${column}${first}:${column}${last})`, result: section.reduce((sum, row) => sum + (index === 0 ? row.approvedStrength : index === 1 ? row.onRoll : vacancyFor({ ...result, reviewCases: cases }, result.rows.indexOf(row))), 0) }))]);
+      sectionTotals.push({ sheet: sheet.name, subcategory, row: total.number });
+    }
+    finish(sheet, [1, 5, 6, 7], 7);
+    sheet.autoFilter = undefined;
+    headings.forEach((number) => {
+      const cell = sheet.getCell(number, 1);
+      cell.font = { name: "Calibri", size: 12, bold: true, color: { argb: "FFFFFFFF" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF404040" } };
+      sheet.getRow(number).height = 30;
+    });
+    sectionTotals.forEach(({ row }) => sheet.getRow(row).eachCell((cell) => { cell.font = { name: "Calibri", size: 11, bold: true }; cell.border = { top: { style: "thin", color: { argb: "FF737373" } } }; }));
+    caseText.forEach((text, number) => { sheet.getRow(number).height = Math.max(28, text.split("\n").reduce((lines, line) => lines + Math.ceil(line.length / 55), 0) * 16 + 10); });
+    if (!dataRows.length) sheet.addRow(["", "No designations configured."]);
+    totals.set(category, sectionTotals);
   });
-  const endRow = Math.max(7, result.rows.length + 6);
-  const quoted = (value: string) => `"${value.replace(/~/g, "~~").replace(/\*/g, "~*").replace(/\?/g, "~?").replace(/"/g, '\"\"')}"`;
   summary.getRow(6).eachCell({ includeEmpty: true }, (cell) => { cell.value = null; cell.style = {}; });
   const summaryTable = (title: string, label: string, rows: typeof view.admin, startColumn: number, subcategories: boolean) => {
     summary.mergeCells(6, startColumn, 6, startColumn + 2);
@@ -119,10 +130,11 @@ export async function createReportWorkbook(result: TurnoverResult, logo?: string
     });
     rows.forEach((row, index) => {
       const number = index + 8;
-      const criteria = `'Strength Detail'!A7:A${endRow},${quoted(row.category)}${subcategories ? `,'Strength Detail'!B7:B${endRow},${quoted(row.name)}` : ""}`;
+      const source = (totals.get(row.category) ?? []).filter((entry) => !subcategories || entry.subcategory === row.name);
+      const formula = (column: string) => source.length ? source.map((entry) => `'${entry.sheet.replace(/'/g, "''")}'!${column}${entry.row}`).join("+") : "0";
       summary.getCell(number, startColumn).value = row.name;
-      summary.getCell(number, startColumn + 1).value = { formula: `SUMIFS('Strength Detail'!F7:F${endRow},${criteria})`, result: row.approved };
-      summary.getCell(number, startColumn + 2).value = { formula: `SUMIFS('Strength Detail'!G7:G${endRow},${criteria})`, result: row.onRoll };
+      summary.getCell(number, startColumn + 1).value = { formula: formula("E"), result: row.approved };
+      summary.getCell(number, startColumn + 2).value = { formula: formula("F"), result: row.onRoll };
     });
     const totalRow = rows.length + 8;
     const approvedColumn = summary.getColumn(startColumn + 1).letter;
@@ -148,24 +160,6 @@ export async function createReportWorkbook(result: TurnoverResult, logo?: string
   summaryTable("Spinning", "Category", view.spinning, 6, false);
   summary.pageSetup.printTitlesRow = "6:7";
   summary.autoFilter = undefined;
-  progress("Adding employee records and validation notes", 65);
-  for (const record of result.employees) {
-    const match = record.match === null ? undefined : result.rows[record.match];
-    employeeSheet.addRow([...TURNOVER_HEADERS.map((header) => record.employee[header]), match?.category ?? "", match?.subcategory ?? "", match?.designation ?? "", match?.grade ?? "", match?.cadre ?? "", match?.approvedStrength ?? "", match ? "Matched" : record.issue, record.sheet, record.row]);
-  }
-  finish(employeeSheet, [18, 21]);
-  const adjustments = makeSheet("Review Cases Adjustments", ["Category", "Subcategory", "Designation", "Case Number", "Against Post / Other Reason"], [30, 42, 38, 16, 48], "Each saved case offsets one negative vacancy. Blue: Against Post. Brown: Social Security. Grey: Other.");
-  cases.forEach((entry) => {
-    const identity = caseIdentity(result, entry.rowIndex, entry.caseNumber);
-    adjustments.addRow([identity.category, identity.subcategory, identity.designation, identity.caseNumber, entry.resolution ? resolutionLabel(entry.resolution) : "Pending"]);
-  });
-  if (!cases.length) adjustments.addRow(["", "", "No negative vacancies require review."]);
-  finish(adjustments, [4]);
-  adjustments.getRow(6).height = 34;
-  cases.forEach((entry, index) => { const row = adjustments.getRow(index + 7); row.height = Math.max(40, Math.ceil(String(row.getCell(5).value ?? "").length / 42) * 14 + 12); row.getCell(4).alignment = { horizontal: "center", vertical: "middle" }; if (entry.resolution) row.eachCell((cell) => tint(cell, entry.resolution!.caseType)); });
-  result.issues.forEach((issue) => validation.addRow([issue.sheet, issue.row || "", issue.employeeId, issue.message, issue.outcome === "counted" ? "Counted once" : issue.outcome === "excluded" ? "Excluded from on-roll" : "Review note"]));
-  if (!result.issues.length) validation.addRow(["", "", "", "No validation issues found."]);
-  finish(validation, [2]);
   progress("Writing valid Excel workbook", 85);
   const bytes = await workbook.xlsx.writeBuffer();
   return new Uint8Array(bytes).buffer;

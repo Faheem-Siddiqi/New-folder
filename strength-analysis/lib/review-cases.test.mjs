@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import ExcelJS from "exceljs";
 import * as XLSX from "xlsx";
-import { buildReviewCases, caseIdentity, againstPostOptions, resolutionAllowed, reviewColors, vacancyFor } from "./review-cases.ts";
+import { buildReviewCases, caseIdentity, againstPostOptions, resolutionAllowed, vacancyFor } from "./review-cases.ts";
 import { appendAdjustment, readAdjustmentHistory } from "./adjustment-history.ts";
 import { createReportWorkbook } from "./report-workbook.ts";
 import { TURNOVER_HEADERS } from "./turnover-contracts.ts";
@@ -77,7 +77,7 @@ test("separate history preserves all resolutions, serializes writes, retries saf
   } finally { await rm(directory,{recursive:true,force:true}); }
 });
 
-test("Excel shows designation cases, adjusted/raw vacancies and all three case types without employee attribution", async () => {
+test("Excel includes all saved case explanations beside adjusted vacancies with only category and summary sheets", async () => {
   const report=makeReport();
   report.reviewCases=buildReviewCases(report,[]);
   report.reviewCases[0].resolution=resolution(report,1);
@@ -88,23 +88,24 @@ test("Excel shows designation cases, adjusted/raw vacancies and all three case t
   const bytes = await createReportWorkbook(report);
   await workbook.xlsx.load(bytes);
   const cells = XLSX.read(bytes, {type:"array"});
-  const adjustments=workbook.getWorksheet("Review Cases Adjustments");
-  assert.equal(adjustments.rowCount,9);
-  assert.deepEqual(adjustments.getRow(6).values.slice(1), ["Category","Subcategory","Designation","Case Number","Against Post / Other Reason"]);
-  assert.equal(adjustments.getRow(4).hasValues,false);
-  assert.equal(adjustments.getRow(5).hasValues,false);
-  assert.ok(adjustments.getRow(7).height >= 40);
-  assert.equal(adjustments.getCell("E8").value,"Social Security");
-  assert.equal(adjustments.getCell("E9").value,"Other · Temporary duty");
-  assert.equal(adjustments.getCell("C7").fill.fgColor.argb,reviewColors["Against Post"].fill);
-  assert.equal(adjustments.getCell("C8").fill.fgColor.argb,reviewColors["Social Security Leave"].fill);
-  assert.equal(adjustments.getCell("C9").fill.fgColor.argb,reviewColors.Other.fill);
-  const detail=workbook.getWorksheet("Strength Detail");
-  assert.equal(detail.getCell("G7").value,4);
-  assert.equal(cells.Sheets["Strength Detail"].H7.v,0);
-  assert.equal(detail.getCell("H7").value.formula,"F7-G7+L7");
-  assert.equal(detail.getCell("M7").value,-3);
-  assert.equal(cells.Sheets.BACKPROCESS.G7.v,0);
-  assert.equal(workbook.getWorksheet("Employees").getRow(6).cellCount,21);
+  assert.deepEqual(workbook.worksheets.map((sheet) => sheet.name), ["Summary", "BACKPROCESS"]);
+  const detail=workbook.getWorksheet("BACKPROCESS");
+  assert.equal(detail.columnCount,8);
+  assert.equal(detail.getCell("F8").value,4);
+  assert.equal(cells.Sheets.BACKPROCESS.G8.v,0);
+  assert.equal(detail.getCell("G8").value.formula,"E8-F8+3");
+  assert.match(detail.getCell("H8").value,/Against Post/);
+  assert.match(detail.getCell("H8").value,/Social Security/);
+  assert.match(detail.getCell("H8").value,/Other.*Temporary duty/);
+  assert.ok(detail.getRow(8).height >= 58);
   assert.equal(JSON.stringify(report),snapshot);
+});
+
+test("Excel shows unresolved excess as pending cases and keeps negative vacancies", async () => {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(await createReportWorkbook(makeReport()));
+  const sheet = workbook.getWorksheet("BACKPROCESS");
+  assert.equal(sheet.getCell("G8").value.result, -3);
+  assert.equal(sheet.getCell("H8").value, "Case 1: Pending review\nCase 2: Pending review\nCase 3: Pending review");
+  assert.equal(sheet.getCell("H9").value, "");
 });

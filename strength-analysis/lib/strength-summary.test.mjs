@@ -13,7 +13,8 @@ test("management summary includes every HR subcategory and the five spinning cat
   const view = strengthView(template);
   const admin = template.strengthStructure.find((category) => category.category === "HR & ADMIN");
   assert.deepEqual(view.admin.map((row) => row.name), admin.subcategories.map((row) => row.subcategory));
-  assert.deepEqual(view.spinning.map((row) => row.name), ["Back Process", "Ring", "Autocone / Machcone / RC", "Spinning General / Lab", "Services"]);
+  assert.deepEqual(view.spinning.slice(0, 5).map((row) => row.name), ["Back Process", "Ring", "Autocone / Machcone / RC", "Spinning General / Lab", "Services"]);
+  assert.equal(view.spinning.length, template.strengthStructure.filter((category) => category.category !== "HR & ADMIN").length);
   assert.equal([...view.admin, ...view.spinning].reduce((sum, row) => sum + row.approved, 0), view.total.approved);
   assert.equal([...view.admin, ...view.spinning].reduce((sum, row) => sum + row.onRoll, 0), view.total.onRoll);
 });
@@ -41,7 +42,7 @@ test("updated hierarchy and approval recalculate UI and Excel while uploaded emp
   assert.equal(workbook.getWorksheet("Summary").getCell("C8").value.result, 7);
   assert.equal(workbook.getWorksheet("Summary").getCell("D8").value.result, 1);
   assert.equal(workbook.getWorksheet("Summary").getCell("C11").value.result, 10);
-  assert.equal(workbook.getWorksheet("SERVICES").getCell("E7").value, 5);
+  assert.equal(workbook.getWorksheet("SERVICES").getCell("E8").value, 5);
   const summary = workbook.getWorksheet("Summary");
   assert.equal(summary.getCell("B6").value,"Admin & HR");
   assert.equal(summary.getCell("F6").value,"Spinning");
