@@ -8,6 +8,11 @@ test("latest JSON saves cases, restores across browsers, and requires approval o
   const path = "../strength-last-result.json";
   const before = await readFile(path, "utf8");
   const templateBefore = await readFile(STRENGTH_FILE, "utf8");
+  await page.addInitScript(() => {
+    for (const name of ["indexedDB", "localStorage", "sessionStorage"]) {
+      Object.defineProperty(window, name, { get() { throw new Error("Browser persistence is disabled"); } });
+    }
+  });
   try {
     await writeFile(path, JSON.stringify({ version: 1, result: null }));
     const template = JSON.parse(templateBefore);
@@ -88,6 +93,11 @@ test("latest JSON saves cases, restores across browsers, and requires approval o
     await expect(cases.nth(2).getByText(/Updated on server/)).toBeVisible();
     await dialog.getByRole("button", { name: "Close review cases" }).click();
     const another = await browser.newContext();
+    await another.addInitScript(() => {
+      for (const name of ["indexedDB", "localStorage", "sessionStorage"]) {
+        Object.defineProperty(window, name, { get() { throw new Error("Browser persistence is disabled"); } });
+      }
+    });
     try {
       const second = await another.newPage();
       await second.goto("http://127.0.0.1:3100/");
@@ -216,5 +226,13 @@ test("the existing full report can be saved through the JSON endpoint", async ({
     expect(failure.ok).toBe(false);
     expect(failure.error).toMatch(/Invalid latest report/);
     expect(JSON.parse(await readFile(path, "utf8")).result.reportId).toBe(saved.result.reportId);
+    const refreshed = await request.post("/api/turnover", { data: { operation: "refresh", expectedReportId: saved.result.reportId } });
+    const latest = await refreshed.json();
+    expect(latest.ok, latest.error).toBe(true);
+    expect(latest.result.employees).toHaveLength(scanned.employees.length);
+    expect(latest.result.reportId).not.toBe(saved.result.reportId);
+    const stale = await request.post("/api/turnover", { data: { operation: "refresh", expectedReportId: saved.result.reportId } });
+    expect((await stale.json()).ok).toBe(false);
+    expect(JSON.parse(await readFile(path, "utf8")).result.reportId).toBe(latest.result.reportId);
   } finally { await writeFile(path, before); }
 });
