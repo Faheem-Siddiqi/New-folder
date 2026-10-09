@@ -2311,7 +2311,7 @@
           "designation": "GATE INSPECTOR",
           "grade": "E-03",
           "cadre": "Staff",
-          "approvedStrength": 1,
+          "approvedStrength": 0,
           "onRoll": 0,
           "status": "Active"
         },
@@ -2390,7 +2390,7 @@
           "designation": "ASSISTANT MANAGER",
           "grade": "M-14",
           "cadre": "Staff",
-          "approvedStrength": 1,
+          "approvedStrength": 0,
           "onRoll": 0,
           "status": "Active"
         }
